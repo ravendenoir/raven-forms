@@ -119,6 +119,28 @@ export async function getSession() {
   return session
 }
 
+// ─── File Upload ─────────────────────────────────
+
+export async function uploadFile(file, formId) {
+  const ext = file.name.split('.').pop()
+  const fileName = `${formId}/${Date.now()}_${Math.random().toString(36).slice(2, 8)}.${ext}`
+
+  const { data, error } = await supabase.storage
+    .from('form-uploads')
+    .upload(fileName, file, {
+      cacheControl: '3600',
+      upsert: false
+    })
+
+  if (error) throw error
+
+  const { data: urlData } = supabase.storage
+    .from('form-uploads')
+    .getPublicUrl(fileName)
+
+  return urlData.publicUrl
+}
+
 // ─── Helpers ─────────────────────────────────────
 
 function generateSlug(title) {

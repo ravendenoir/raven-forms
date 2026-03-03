@@ -32,6 +32,7 @@ const FIELD_TYPES = [
   { type: 'checkbox', label: 'Checkboxes', icon: CheckSquare },
   { type: 'rating', label: 'Rating', icon: Star },
   { type: 'toggle', label: 'Yes / No', icon: ToggleLeft },
+  { type: 'file', label: 'File Upload', icon: Upload },
   { type: 'heading', label: 'Heading', icon: List },
 ]
 
@@ -47,6 +48,8 @@ function createField(type) {
       ? ['Option 1', 'Option 2']
       : [],
     description: '',
+    accept: type === 'file' ? 'image/*,.pdf,.doc,.docx' : '',
+    maxSizeMB: type === 'file' ? 10 : 0,
   }
 }
 
@@ -218,6 +221,34 @@ function FieldProperties({ field, onUpdate }) {
             }`} />
           </button>
         </div>
+      )}
+
+      {/* File upload settings */}
+      {field.type === 'file' && (
+        <>
+          <div>
+            <label className="block text-xs text-raven-300/60 mb-1.5 font-medium">Accepted File Types</label>
+            <input
+              type="text"
+              value={field.accept || 'image/*,.pdf,.doc,.docx'}
+              onChange={e => onUpdate({ ...field, accept: e.target.value })}
+              placeholder="image/*,.pdf,.doc,.docx"
+              className="w-full px-3 py-2 bg-raven-900 border border-raven-800/50 rounded-lg text-sm text-raven-50 placeholder:text-raven-300/30 font-mono"
+            />
+            <p className="text-xs text-raven-300/30 mt-1">e.g. image/* for images, .pdf for PDFs</p>
+          </div>
+          <div>
+            <label className="block text-xs text-raven-300/60 mb-1.5 font-medium">Max File Size (MB)</label>
+            <input
+              type="number"
+              value={field.maxSizeMB || 10}
+              onChange={e => onUpdate({ ...field, maxSizeMB: parseInt(e.target.value) || 10 })}
+              min={1}
+              max={50}
+              className="w-full px-3 py-2 bg-raven-900 border border-raven-800/50 rounded-lg text-sm text-raven-50"
+            />
+          </div>
+        </>
       )}
     </div>
   )
@@ -651,6 +682,12 @@ export default function FormBuilder() {
                       ) : field.type === 'toggle' ? (
                         <div className="w-10 h-5 rounded-full bg-raven-800/50 relative">
                           <div className="w-4 h-4 rounded-full bg-raven-300/30 absolute top-0.5 left-0.5" />
+                        </div>
+                      ) : field.type === 'file' ? (
+                        <div className="border-2 border-dashed border-raven-800/40 rounded-lg p-6 text-center">
+                          <Upload className="w-6 h-6 text-raven-300/30 mx-auto mb-2" />
+                          <p className="text-xs text-raven-300/40">Click or drag to upload</p>
+                          <p className="text-xs text-raven-300/25 mt-1">Max {field.maxSizeMB || 10}MB</p>
                         </div>
                       ) : (
                         <input type={field.type === 'email' ? 'email' : field.type === 'number' ? 'number' : field.type === 'date' ? 'date' : 'text'}

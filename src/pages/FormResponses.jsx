@@ -127,7 +127,11 @@ export default function FormResponses() {
     if (val === null || val === undefined) return '—'
     if (Array.isArray(val)) return val.join(', ')
     if (typeof val === 'boolean') return val ? 'Yes' : 'No'
-    return String(val)
+    const str = String(val)
+    if (str.startsWith('https://') && str.includes('form-uploads')) {
+      return <a href={str} target="_blank" rel="noopener noreferrer" className="text-raven-300 underline hover:text-raven-200">View File</a>
+    }
+    return str
   }
 
   if (loading) {

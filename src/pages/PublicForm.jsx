@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
-import { getFormBySlug, submitForm, triggerMailchimp, triggerNotification } from '../lib/supabase'
-import { Feather, Star, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react'
+import { getFormBySlug, submitForm, uploadFile, triggerMailchimp, triggerNotification } from '../lib/supabase'
+import { Feather, Star, CheckCircle2, AlertCircle, Loader2, Upload, X } from 'lucide-react'
 
 export default function PublicForm() {
   const { slug } = useParams()
@@ -11,6 +11,7 @@ export default function PublicForm() {
   const [submitted, setSubmitted] = useState(false)
   const [error, setError] = useState('')
   const [values, setValues] = useState({})
+  const [fileData, setFileData] = useState({}) // { fieldId: { file, preview } }
   const [errors, setErrors] = useState({})
 
   useEffect(() => {
@@ -42,6 +43,25 @@ export default function PublicForm() {
     setErrors(prev => ({ ...prev, [fieldId]: '' }))
   }
 
+  function handleFileChange(fieldId, file, field) {
+    if (!file) return
+    const maxSize = (field.maxSizeMB || 10) * 1024 * 1024
+    if (file.size > maxSize) {
+      setErrors(prev => ({ ...prev, [fieldId]: `File exceeds ${field.maxSizeMB || 10}MB limit` }))
+      return
+    }
+    const preview = file.type.startsWith('image/') ? URL.createObjectURL(file) : null
+    setFileData(prev => ({ ...prev, [fieldId]: { file, preview } }))
+    setValues(prev => ({ ...prev, [fieldId]: file.name }))
+    setErrors(prev => ({ ...prev, [fieldId]: '' }))
+  }
+
+  function removeFile(fieldId) {
+    if (fileData[fieldId]?.preview) URL.revokeObjectURL(fileData[fieldId].preview)
+    setFileData(prev => { const n = { ...prev }; delete n[fieldId]; return n })
+    setValues(prev => ({ ...prev, [fieldId]: '' }))
+  }
+
   function validate() {
     const newErrors = {}
     ;(form.fields || []).forEach(field => {
@@ -51,7 +71,9 @@ export default function PublicForm() {
           newErrors[field.id] = 'Please select at least one option'
         } else if (field.type === 'rating' && (!val || val === 0)) {
           newErrors[field.id] = 'Please provide a rating'
-        } else if (field.type !== 'checkbox' && field.type !== 'rating' && field.type !== 'toggle' && !val) {
+        } else if (field.type === 'file' && !fileData[field.id]) {
+          newErrors[field.id] = 'Please upload a file'
+        } else if (field.type !== 'checkbox' && field.type !== 'rating' && field.type !== 'toggle' && field.type !== 'file' && !val) {
           newErrors[field.id] = 'This field is required'
         }
       }
@@ -72,11 +94,28 @@ export default function PublicForm() {
 
     setSubmitting(true)
     try {
+      // Upload any files first
+      const fileUrls = {}
+      for (const [fieldId, { file }] of Object.entries(fileData)) {
+        try {
+          const url = await uploadFile(file, form.id)
+          fileUrls[fieldId] = url
+        } catch (err) {
+          setError(`Failed to upload ${file.name}`)
+          setSubmitting(false)
+          return
+        }
+      }
+
       // Build submission data with field labels
       const submissionData = {}
       ;(form.fields || []).forEach(field => {
         if (field.type !== 'heading') {
-          submissionData[field.label] = values[field.id]
+          if (field.type === 'file' && fileUrls[field.id]) {
+            submissionData[field.label] = fileUrls[field.id]
+          } else {
+            submissionData[field.label] = values[field.id]
+          }
         }
       })
 
@@ -297,6 +336,38 @@ export default function PublicForm() {
                         values[field.id] ? 'left-6' : 'left-0.5'
                       }`} />
                     </button>
+                  )}
+
+                  {/* File Upload */}
+                  {field.type === 'file' && (
+                    <div>
+                      {fileData[field.id] ? (
+                        <div className="border border-raven-800/40 rounded-lg p-3 flex items-center gap-3">
+                          {fileData[field.id].preview && (
+                            <img src={fileData[field.id].preview} alt="Preview" className="w-12 h-12 object-cover rounded" />
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm text-raven-50 truncate">{fileData[field.id].file.name}</p>
+                            <p className="text-xs text-raven-300/40">{(fileData[field.id].file.size / 1024 / 1024).toFixed(1)} MB</p>
+                          </div>
+                          <button type="button" onClick={() => removeFile(field.id)} className="p-1 text-raven-300/40 hover:text-red-400 transition-smooth">
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ) : (
+                        <label className="block border-2 border-dashed border-raven-800/40 rounded-lg p-6 text-center cursor-pointer hover:border-raven-300/30 transition-smooth">
+                          <Upload className="w-6 h-6 mx-auto mb-2" style={{ color: accentColor }} />
+                          <p className="text-sm text-raven-300/60">Click to upload</p>
+                          <p className="text-xs text-raven-300/30 mt-1">Max {field.maxSizeMB || 10}MB</p>
+                          <input
+                            type="file"
+                            className="sr-only"
+                            accept={field.accept || 'image/*,.pdf,.doc,.docx'}
+                            onChange={e => handleFileChange(field.id, e.target.files?.[0], field)}
+                          />
+                        </label>
+                      )}
+                    </div>
                   )}
 
                   {/* Error */}
