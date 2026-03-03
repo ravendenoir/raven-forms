@@ -1,0 +1,84 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --raven-gold: #c9a55c;
+  --raven-gold-dim: #a07d2f;
+  --raven-bg: #08080d;
+  --raven-surface: #0d0d14;
+  --raven-card: #13131b;
+  --raven-border: #1f1f2e;
+  --raven-text: #e8e4dc;
+  --raven-muted: #7a7a8a;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'DM Sans', system-ui, sans-serif;
+  background-color: var(--raven-bg);
+  color: var(--raven-text);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--raven-border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--raven-muted); }
+
+/* Form field focus */
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  border-color: var(--raven-gold) !important;
+  box-shadow: 0 0 0 2px rgba(201, 165, 92, 0.15);
+}
+
+/* Drag ghost */
+.drag-ghost {
+  opacity: 0.5;
+  background: var(--raven-card) !important;
+}
+
+/* Smooth transitions */
+.transition-smooth {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Public form styles */
+.public-form input,
+.public-form textarea,
+.public-form select {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  color: var(--raven-text);
+  font-family: 'DM Sans', system-ui, sans-serif;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+}
+
+.public-form input::placeholder,
+.public-form textarea::placeholder {
+  color: var(--raven-muted);
+}
+
+/* Toast notification */
+@keyframes slideIn {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+@keyframes slideOut {
+  from { transform: translateX(0); opacity: 1; }
+  to { transform: translateX(100%); opacity: 0; }
+}
+.toast-enter { animation: slideIn 0.3s ease forwards; }
+.toast-exit { animation: slideOut 0.3s ease forwards; }
