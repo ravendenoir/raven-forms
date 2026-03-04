@@ -146,7 +146,8 @@ export default function PublicForm() {
         setSubmitted(true)
       }
     } catch (err) {
-      setError('Something went wrong. Please try again.')
+      console.error('Submission error:', err)
+      setError(err.message || 'Something went wrong. Please try again.')
     } finally {
       setSubmitting(false)
     }
