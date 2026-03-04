@@ -135,7 +135,7 @@ export default function PublicForm() {
       }
 
       // Trigger email notification
-      if (settings.notification_enabled) {
+      if (settings.notification_enabled !== false) {
         await triggerNotification(form.title, submissionData)
       }
 
