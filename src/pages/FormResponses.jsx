@@ -4,7 +4,7 @@ import { getForm, getSubmissions, deleteSubmission, submitForm } from '../lib/su
 import { useToast } from '../App'
 import {
   ArrowLeft, Download, Upload, Plus, Trash2, Inbox, Clock,
-  ChevronLeft, ChevronRight, ExternalLink, X
+  ChevronLeft, ChevronRight, ExternalLink, X, BarChart3, List
 } from 'lucide-react'
 
 export default function FormResponses() {
@@ -17,6 +17,7 @@ export default function FormResponses() {
   const [loading, setLoading] = useState(true)
   const [page, setPage] = useState(0)
   const [selectedIds, setSelectedIds] = useState(new Set())
+  const [viewTab, setViewTab] = useState('responses')
   const perPage = 25
 
   useEffect(() => {
@@ -316,6 +317,86 @@ export default function FormResponses() {
         </div>
       </div>
 
+      {/* Tabs */}
+      {submissions.length > 0 && (
+        <div className="flex gap-1 mb-4">
+          <button onClick={() => setViewTab('responses')}
+            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition-smooth ${viewTab === 'responses' ? 'bg-raven-300 text-white' : 'text-raven-500 hover:bg-raven-900'}`}>
+            <List className="w-3.5 h-3.5" /> Responses
+          </button>
+          <button onClick={() => setViewTab('summary')}
+            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition-smooth ${viewTab === 'summary' ? 'bg-raven-300 text-white' : 'text-raven-500 hover:bg-raven-900'}`}>
+            <BarChart3 className="w-3.5 h-3.5" /> Summary
+          </button>
+        </div>
+      )}
+
+      {/* Summary View */}
+      {viewTab === 'summary' && submissions.length > 0 && (() => {
+        const chartFields = (form?.fields || []).filter(f => ['radio', 'select', 'checkbox', 'rating', 'toggle', 'likert'].includes(f.type))
+        if (chartFields.length === 0) return (
+          <div className="text-center py-12 border border-dashed border-raven-200 rounded-xl">
+            <BarChart3 className="w-8 h-8 text-raven-500/40 mx-auto mb-2" />
+            <p className="text-sm text-raven-500">No chart-compatible fields in this form.</p>
+            <p className="text-xs text-raven-500/50 mt-1">Add radio, dropdown, checkbox, rating, or toggle fields to see charts.</p>
+          </div>
+        )
+        const accentColor = form?.settings?.accent_color || '#b8923e'
+        return (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {chartFields.map(field => {
+              const counts = {}
+              if (field.type === 'rating') {
+                [1,2,3,4,5].forEach(n => { counts[`${n} star${n !== 1 ? 's' : ''}`] = 0 })
+                submissions.forEach(s => {
+                  const v = s.data?.[field.label]
+                  if (v) counts[`${v} star${v !== 1 ? 's' : ''}`] = (counts[`${v} star${v !== 1 ? 's' : ''}`] || 0) + 1
+                })
+              } else if (field.type === 'toggle') {
+                counts['Yes'] = 0; counts['No'] = 0
+                submissions.forEach(s => {
+                  const v = s.data?.[field.label]
+                  if (v === true || v === 'true') counts['Yes']++
+                  else counts['No']++
+                })
+              } else {
+                ;(field.options || []).forEach(o => { counts[o] = 0 })
+                submissions.forEach(s => {
+                  const v = s.data?.[field.label]
+                  if (Array.isArray(v)) { v.forEach(x => { counts[x] = (counts[x] || 0) + 1 }) }
+                  else if (v) { counts[v] = (counts[v] || 0) + 1 }
+                })
+              }
+              const maxCount = Math.max(...Object.values(counts), 1)
+              const totalResponded = Object.values(counts).reduce((a, b) => a + b, 0)
+              return (
+                <div key={field.id} className="bg-white border border-raven-200 rounded-xl p-5">
+                  <h4 className="text-sm font-semibold text-raven-50 mb-3">{field.label}</h4>
+                  <div className="space-y-2">
+                    {Object.entries(counts).map(([label, count]) => {
+                      const pct = totalResponded > 0 ? Math.round((count / totalResponded) * 100) : 0
+                      return (
+                        <div key={label}>
+                          <div className="flex justify-between text-xs text-raven-700 mb-1">
+                            <span>{label}</span>
+                            <span className="text-raven-500">{count} ({pct}%)</span>
+                          </div>
+                          <div className="w-full h-5 rounded-full bg-raven-900 overflow-hidden">
+                            <div className="h-full rounded-full transition-all duration-300"
+                              style={{ width: `${(count / maxCount) * 100}%`, backgroundColor: accentColor }} />
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                  <p className="text-[10px] text-raven-500/50 mt-2">{totalResponded} response{totalResponded !== 1 ? 's' : ''}</p>
+                </div>
+              )
+            })}
+          </div>
+        )
+      })()}
+
       {/* Empty State */}
       {submissions.length === 0 ? (
         <div className="text-center py-20 border border-dashed border-raven-200 rounded-xl">
@@ -323,7 +404,7 @@ export default function FormResponses() {
           <p className="text-raven-500/80 text-sm">No responses yet.</p>
           <p className="text-raven-500/50 text-xs mt-1">Share your form link to start collecting responses.</p>
         </div>
-      ) : (
+      ) : viewTab === 'responses' ? (
         <>
           {/* Table */}
           <div className="bg-raven-850 border border-raven-800/40 rounded-xl overflow-hidden">
@@ -400,7 +481,7 @@ export default function FormResponses() {
             </div>
           )}
         </>
-      )}
+      ) : null}
 
       {/* Add Record Modal */}
       {showAddRecord && (

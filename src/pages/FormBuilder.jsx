@@ -72,6 +72,9 @@ function createField(type) {
     page: 0,
     // Conditional logic
     conditions: [],
+    // Quiz
+    correctAnswer: '',
+    points: 1,
   }
 }
 
@@ -132,7 +135,7 @@ function AddFieldButton({ onAdd, position, alwaysShow }) {
 }
 
 // ─── Floating Toolbar ────────────────────────────
-function FloatingToolbar({ field, onUpdate, onDelete, onDuplicate, fields }) {
+function FloatingToolbar({ field, onUpdate, onDelete, onDuplicate, fields, formSettings }) {
   const [showSettings, setShowSettings] = useState(false)
   const ref = useRef(null)
   const hasOptions = ['select', 'radio', 'checkbox', 'likert'].includes(field.type)
@@ -260,6 +263,39 @@ function FloatingToolbar({ field, onUpdate, onDelete, onDuplicate, fields }) {
                   <input type="number" value={field.step ?? 1} onChange={e => onUpdate({ ...field, step: Number(e.target.value) })}
                     className="w-full px-3 py-2 bg-white border border-raven-200 rounded-lg text-sm text-raven-50" />
                 </div>
+              </div>
+            </div>
+          )}
+
+          {/* Quiz Scoring */}
+          {(formSettings?.form_mode === 'quiz') && !isContent && ['select', 'radio', 'checkbox', 'text', 'number', 'toggle'].includes(field.type) && (
+            <div className="border-t border-raven-200 pt-3 space-y-2">
+              <label className="block text-xs text-raven-500 font-medium">Quiz Scoring</label>
+              <div>
+                <label className="block text-[10px] text-raven-500 mb-1">Correct Answer</label>
+                {['select', 'radio'].includes(field.type) ? (
+                  <select value={field.correctAnswer || ''} onChange={e => onUpdate({ ...field, correctAnswer: e.target.value })}
+                    className="w-full px-3 py-1.5 bg-white border border-raven-200 rounded text-sm text-raven-50">
+                    <option value="">No correct answer</option>
+                    {(field.options || []).map(o => <option key={o} value={o}>{o}</option>)}
+                  </select>
+                ) : field.type === 'toggle' ? (
+                  <select value={field.correctAnswer || ''} onChange={e => onUpdate({ ...field, correctAnswer: e.target.value })}
+                    className="w-full px-3 py-1.5 bg-white border border-raven-200 rounded text-sm text-raven-50">
+                    <option value="">No correct answer</option>
+                    <option value="true">Yes</option>
+                    <option value="false">No</option>
+                  </select>
+                ) : (
+                  <input type="text" value={field.correctAnswer || ''} placeholder="Correct answer..."
+                    onChange={e => onUpdate({ ...field, correctAnswer: e.target.value })}
+                    className="w-full px-3 py-1.5 bg-white border border-raven-200 rounded text-sm text-raven-50" />
+                )}
+              </div>
+              <div>
+                <label className="block text-[10px] text-raven-500 mb-1">Points</label>
+                <input type="number" min={0} value={field.points ?? 1} onChange={e => onUpdate({ ...field, points: Number(e.target.value) })}
+                  className="w-20 px-3 py-1.5 bg-white border border-raven-200 rounded text-sm text-raven-50" />
               </div>
             </div>
           )}
@@ -661,7 +697,7 @@ function ImageUploadBlock({ field, onUpdate, type }) {
 }
 
 // ─── Sortable Field ──────────────────────────────
-function SortableFormField({ field, isSelected, onSelect, onUpdate, onDelete, onDuplicate, fields }) {
+function SortableFormField({ field, isSelected, onSelect, onUpdate, onDelete, onDuplicate, fields, formSettings }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: field.id })
   const style = { transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.4 : 1 }
 
@@ -676,7 +712,7 @@ function SortableFormField({ field, isSelected, onSelect, onUpdate, onDelete, on
         className="absolute left-1 top-1/2 -translate-y-1/2 p-1 opacity-0 group-hover:opacity-100 cursor-grab active:cursor-grabbing text-raven-200 hover:text-raven-500 transition-smooth">
         <GripVertical className="w-4 h-4" />
       </div>
-      {isSelected && <FloatingToolbar field={field} onUpdate={onUpdate} onDelete={onDelete} onDuplicate={onDuplicate} fields={fields} />}
+      {isSelected && <FloatingToolbar field={field} onUpdate={onUpdate} onDelete={onDelete} onDuplicate={onDuplicate} fields={fields} formSettings={formSettings} />}
 
       <div className="pl-4">
         {field.type === 'banner_image' ? (
@@ -838,6 +874,58 @@ function SettingsModal({ settings, onUpdate, onClose, formDescription, onDescrip
           </div>
         </div>
 
+        {/* Form Mode */}
+        <div className="border-t border-raven-200 pt-4 space-y-3">
+          <h4 className="text-xs text-raven-500 font-medium">Form Mode</h4>
+          <div className="flex gap-2">
+            {['form', 'quiz', 'poll'].map(mode => (
+              <button key={mode} onClick={() => onUpdate({ ...settings, form_mode: mode })}
+                className={`flex-1 py-2 text-xs font-medium rounded-lg transition-smooth ${(settings.form_mode || 'form') === mode ? 'bg-raven-300 text-white' : 'bg-raven-900 text-raven-500 hover:text-raven-50'}`}>
+                {mode.charAt(0).toUpperCase() + mode.slice(1)}
+              </button>
+            ))}
+          </div>
+          {(settings.form_mode === 'quiz') && (
+            <div className="space-y-2 pl-1">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs text-raven-50 font-medium">Show Score</p>
+                  <p className="text-[10px] text-raven-500/60">Display score after submission</p>
+                </div>
+                <button onClick={() => onUpdate({ ...settings, show_score: !settings.show_score })}
+                  className={`w-10 h-5 rounded-full transition-smooth relative ${settings.show_score ? 'bg-raven-300' : 'bg-gray-300'}`}>
+                  <div className={`w-4 h-4 rounded-full bg-white shadow absolute top-0.5 transition-smooth ${settings.show_score ? 'left-5' : 'left-0.5'}`} />
+                </button>
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs text-raven-50 font-medium">Show Correct Answers</p>
+                  <p className="text-[10px] text-raven-500/60">Reveal answers after submission</p>
+                </div>
+                <button onClick={() => onUpdate({ ...settings, show_correct_answers: !settings.show_correct_answers })}
+                  className={`w-10 h-5 rounded-full transition-smooth relative ${settings.show_correct_answers ? 'bg-raven-300' : 'bg-gray-300'}`}>
+                  <div className={`w-4 h-4 rounded-full bg-white shadow absolute top-0.5 transition-smooth ${settings.show_correct_answers ? 'left-5' : 'left-0.5'}`} />
+                </button>
+              </div>
+              <p className="text-[10px] text-raven-500/60 italic">Set correct answers and point values per field in the field settings (gear icon).</p>
+            </div>
+          )}
+          {(settings.form_mode === 'poll') && (
+            <div className="space-y-2 pl-1">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs text-raven-50 font-medium">Show Live Results</p>
+                  <p className="text-[10px] text-raven-500/60">Display results after voting</p>
+                </div>
+                <button onClick={() => onUpdate({ ...settings, show_poll_results: !settings.show_poll_results })}
+                  className={`w-10 h-5 rounded-full transition-smooth relative ${settings.show_poll_results ? 'bg-raven-300' : 'bg-gray-300'}`}>
+                  <div className={`w-4 h-4 rounded-full bg-white shadow absolute top-0.5 transition-smooth ${settings.show_poll_results ? 'left-5' : 'left-0.5'}`} />
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+
         {/* Integrations */}
         <div className="border-t border-raven-200 pt-4 space-y-3">
           <h4 className="text-xs text-raven-500 font-medium">Integrations</h4>
@@ -934,6 +1022,10 @@ export default function FormBuilder() {
     background_color: '#faf7f2',
     text_color: '#2a2520',
     card_color: '#ffffff',
+    form_mode: 'form',
+    show_score: false,
+    show_correct_answers: false,
+    show_poll_results: false,
   })
   const [published, setPublished] = useState(false)
   const [slug, setSlug] = useState('')
@@ -1155,7 +1247,7 @@ export default function FormBuilder() {
                 <div key={field.id} className={field.width === 'full' || !field.width ? 'w-full' : ''}>
                   <SortableFormField field={field} isSelected={selectedFieldId === field.id}
                     onSelect={setSelectedFieldId} onUpdate={updateField} onDelete={deleteField}
-                    onDuplicate={duplicateField} fields={fields} />
+                    onDuplicate={duplicateField} fields={fields} formSettings={settings} />
                   {field.width === 'full' || !field.width ? (
                     <AddFieldButton onAdd={addFieldAt} position={fields.indexOf(field) + 1} alwaysShow={fields.filter(f => (f.page || 0) === currentPage).length < 3} />
                   ) : null}

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
-import { getFormBySlug, submitForm, uploadFile, triggerMailchimp, triggerNotification, triggerWelcomeEmail, checkDuplicateEmailByField, trackFormView } from '../lib/supabase'
+import { getFormBySlug, submitForm, uploadFile, triggerMailchimp, triggerNotification, triggerWelcomeEmail, checkDuplicateEmailByField, trackFormView, getSubmissions } from '../lib/supabase'
 import { Feather, Star, CheckCircle2, AlertCircle, Loader2, Upload, X } from 'lucide-react'
 
 export default function PublicForm() {
@@ -15,6 +15,8 @@ export default function PublicForm() {
   const [errors, setErrors] = useState({})
   const [honeypot, setHoneypot] = useState('')
   const [currentPage, setCurrentPage] = useState(0)
+  const [quizResults, setQuizResults] = useState(null)
+  const [pollResults, setPollResults] = useState(null)
 
   useEffect(() => {
     loadForm()
@@ -234,6 +236,44 @@ export default function PublicForm() {
       if (settings.thank_you_url) {
         window.location.href = settings.thank_you_url
       } else {
+        // Quiz scoring
+        if (settings.form_mode === 'quiz' && settings.show_score) {
+          const quizFields = (form.fields || []).filter(f => f.correctAnswer && isFieldVisible(f))
+          let score = 0, total = 0, fieldResults = []
+          quizFields.forEach(f => {
+            const pts = f.points ?? 1
+            total += pts
+            const userVal = String(values[f.id] || '')
+            const correct = String(f.correctAnswer || '')
+            const isCorrect = f.type === 'toggle'
+              ? userVal === correct
+              : userVal.toLowerCase().trim() === correct.toLowerCase().trim()
+            if (isCorrect) score += pts
+            fieldResults.push({ label: f.label, userAnswer: userVal, correctAnswer: correct, isCorrect, points: pts })
+          })
+          setQuizResults({ score, total, percentage: total > 0 ? Math.round((score / total) * 100) : 0, fields: fieldResults })
+        }
+
+        // Poll results
+        if (settings.form_mode === 'poll' && settings.show_poll_results) {
+          try {
+            const subs = await getSubmissions(form.id)
+            const pollFields = (form.fields || []).filter(f => ['radio', 'select', 'checkbox'].includes(f.type))
+            const results = {}
+            pollFields.forEach(f => {
+              const counts = {}
+              ;(f.options || []).forEach(o => { counts[o] = 0 })
+              subs.forEach(s => {
+                const val = s.data?.[f.label]
+                if (Array.isArray(val)) { val.forEach(v => { counts[v] = (counts[v] || 0) + 1 }) }
+                else if (val) { counts[val] = (counts[val] || 0) + 1 }
+              })
+              results[f.id] = { label: f.label, counts, total: subs.length, options: f.options || [] }
+            })
+            setPollResults(results)
+          } catch (err) { console.error('Poll results error:', err) }
+        }
+
         setSubmitted(true)
       }
     } catch (err) {
@@ -280,15 +320,82 @@ export default function PublicForm() {
     return (
       <div className="min-h-screen flex items-center justify-center px-4"
         style={{ backgroundColor: bgColor }}>
-        <div className="text-center max-w-lg">
-          <CheckCircle2 className="w-12 h-12 mx-auto mb-4" style={{ color: accentColor }} />
-          <div className="prose prose-sm max-w-none
-            [&_blockquote]:border-l-4 [&_blockquote]:border-raven-300 [&_blockquote]:pl-4 [&_blockquote]:italic
-            [&_ul]:list-disc [&_ul]:ml-5 [&_ol]:list-decimal [&_ol]:ml-5
-            [&_h2]:font-display [&_h2]:text-2xl [&_h2]:font-bold [&_h2]:mb-2
-            [&_p]:text-sm [&_p]:leading-relaxed"
-            style={{ color: textColor }}
-            dangerouslySetInnerHTML={{ __html: tyContent }} />
+        <div className="w-full max-w-lg">
+          <div className="text-center">
+            <CheckCircle2 className="w-12 h-12 mx-auto mb-4" style={{ color: accentColor }} />
+            <div className="prose prose-sm max-w-none
+              [&_blockquote]:border-l-4 [&_blockquote]:border-raven-300 [&_blockquote]:pl-4 [&_blockquote]:italic
+              [&_ul]:list-disc [&_ul]:ml-5 [&_ol]:list-decimal [&_ol]:ml-5
+              [&_h2]:font-display [&_h2]:text-2xl [&_h2]:font-bold [&_h2]:mb-2
+              [&_p]:text-sm [&_p]:leading-relaxed"
+              style={{ color: textColor }}
+              dangerouslySetInnerHTML={{ __html: tyContent }} />
+          </div>
+
+          {/* Quiz Results */}
+          {quizResults && (
+            <div className="mt-8 rounded-xl p-6" style={{ backgroundColor: cardColor }}>
+              <div className="text-center mb-4">
+                <div className="text-4xl font-bold font-display" style={{ color: accentColor }}>
+                  {quizResults.percentage}%
+                </div>
+                <p className="text-sm mt-1" style={{ color: textColor, opacity: 0.6 }}>
+                  {quizResults.score} / {quizResults.total} points
+                </p>
+              </div>
+              {/* Progress ring */}
+              <div className="w-full h-3 rounded-full mb-6" style={{ backgroundColor: textColor, opacity: 0.1 }}>
+                <div className="h-full rounded-full transition-all duration-500" style={{ width: `${quizResults.percentage}%`, backgroundColor: accentColor }} />
+              </div>
+              {form.settings?.show_correct_answers && quizResults.fields.map((r, i) => (
+                <div key={i} className="flex items-start gap-3 py-2 border-b last:border-0" style={{ borderColor: textColor + '15' }}>
+                  <div className={`w-5 h-5 rounded-full flex items-center justify-center mt-0.5 shrink-0 ${r.isCorrect ? 'bg-emerald-100 text-emerald-600' : 'bg-red-100 text-red-500'}`}>
+                    {r.isCorrect ? '✓' : '✗'}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium" style={{ color: textColor }}>{r.label}</p>
+                    <p className="text-xs mt-0.5" style={{ color: textColor, opacity: 0.5 }}>
+                      Your answer: {r.userAnswer || '(empty)'} {!r.isCorrect && `· Correct: ${r.correctAnswer}`}
+                    </p>
+                  </div>
+                  <span className="text-xs font-medium" style={{ color: r.isCorrect ? '#059669' : textColor, opacity: r.isCorrect ? 1 : 0.3 }}>
+                    {r.isCorrect ? `+${r.points}` : '0'}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Poll Results */}
+          {pollResults && (
+            <div className="mt-8 space-y-6">
+              {Object.values(pollResults).map((pr, i) => (
+                <div key={i} className="rounded-xl p-5" style={{ backgroundColor: cardColor }}>
+                  <h4 className="text-sm font-semibold mb-3" style={{ color: textColor }}>{pr.label}</h4>
+                  <div className="space-y-2">
+                    {pr.options.map(opt => {
+                      const count = pr.counts[opt] || 0
+                      const pct = pr.total > 0 ? Math.round((count / pr.total) * 100) : 0
+                      return (
+                        <div key={opt}>
+                          <div className="flex justify-between text-xs mb-1" style={{ color: textColor }}>
+                            <span>{opt}</span>
+                            <span style={{ opacity: 0.5 }}>{count} vote{count !== 1 ? 's' : ''} · {pct}%</span>
+                          </div>
+                          <div className="w-full h-6 rounded-full overflow-hidden" style={{ backgroundColor: textColor + '10' }}>
+                            <div className="h-full rounded-full transition-all duration-500 flex items-center pl-2"
+                              style={{ width: `${Math.max(pct, 2)}%`, backgroundColor: accentColor }}>
+                            </div>
+                          </div>
+                        </div>
+                      )
+                    })}
+                    <p className="text-[10px] text-right mt-1" style={{ color: textColor, opacity: 0.4 }}>{pr.total} total response{pr.total !== 1 ? 's' : ''}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     )
