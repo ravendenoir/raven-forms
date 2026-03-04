@@ -14,6 +14,7 @@ export default function PublicForm() {
   const [fileData, setFileData] = useState({}) // { fieldId: { file, preview } }
   const [errors, setErrors] = useState({})
   const [honeypot, setHoneypot] = useState('')
+  const [currentPage, setCurrentPage] = useState(0)
 
   useEffect(() => {
     loadForm()
@@ -65,9 +66,60 @@ export default function PublicForm() {
     setValues(prev => ({ ...prev, [fieldId]: '' }))
   }
 
+  // Multi-page
+  const totalPages = form ? Math.max(1, (form.fields || []).reduce((max, f) => Math.max(max, (f.page || 0) + 1), 1)) : 1
+  const isMultiPage = totalPages > 1
+
+  // Conditional logic
+  function isFieldVisible(field) {
+    if (!field.conditions || field.conditions.length === 0) return true
+    return field.conditions.every(cond => {
+      if (!cond.fieldId) return true
+      const val = values[cond.fieldId]
+      const strVal = Array.isArray(val) ? val.join(', ') : String(val || '')
+      switch (cond.operator) {
+        case 'equals': return strVal.toLowerCase() === (cond.value || '').toLowerCase()
+        case 'not_equals': return strVal.toLowerCase() !== (cond.value || '').toLowerCase()
+        case 'contains': return strVal.toLowerCase().includes((cond.value || '').toLowerCase())
+        case 'not_empty': return strVal.length > 0
+        case 'is_empty': return strVal.length === 0 || strVal === '0' || strVal === 'false'
+        default: return true
+      }
+    })
+  }
+
+  // Validate current page only (for multi-page next)
+  function validatePage(pageNum) {
+    const newErrors = {}
+    ;(form.fields || []).forEach(field => {
+      if ((field.page || 0) !== pageNum) return
+      if (!isFieldVisible(field)) return
+      if (field.required && !['heading', 'banner_image', 'avatar_image', 'richtext', 'file', 'divider'].includes(field.type)) {
+        const val = values[field.id]
+        if (field.type === 'checkbox' && (!val || val.length === 0)) {
+          newErrors[field.id] = 'Please select at least one option'
+        } else if (field.type === 'rating' && (!val || val === 0)) {
+          newErrors[field.id] = 'Please provide a rating'
+        } else if (field.type === 'file' && !fileData[field.id]) {
+          newErrors[field.id] = 'Please upload a file'
+        } else if (!['checkbox', 'rating', 'toggle', 'file'].includes(field.type) && !val) {
+          newErrors[field.id] = 'This field is required'
+        }
+      }
+      if (field.type === 'email' && values[field.id]) {
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values[field.id])) {
+          newErrors[field.id] = 'Please enter a valid email'
+        }
+      }
+    })
+    setErrors(prev => ({ ...prev, ...newErrors }))
+    return Object.keys(newErrors).length === 0
+  }
+
   function validate() {
     const newErrors = {}
     ;(form.fields || []).forEach(field => {
+      if (!isFieldVisible(field)) return
       if (field.required && !['heading', 'banner_image', 'avatar_image', 'richtext', 'file', 'divider'].includes(field.type)) {
         const val = values[field.id]
         if (field.type === 'checkbox' && (!val || val.length === 0)) {
@@ -135,6 +187,7 @@ export default function PublicForm() {
       // Build submission data with field labels
       const submissionData = {}
       ;(form.fields || []).forEach(field => {
+        if (!isFieldVisible(field)) return
         if (!['heading', 'banner_image', 'avatar_image', 'richtext', 'file', 'divider'].includes(field.type)) {
           if (field.type === 'file' && fileUrls[field.id]) {
             submissionData[field.label] = fileUrls[field.id]
@@ -254,6 +307,19 @@ export default function PublicForm() {
           )}
         </div>
 
+        {/* Progress bar for multi-page */}
+        {isMultiPage && (
+          <div className="mb-6">
+            <div className="flex items-center justify-between text-xs mb-2" style={{ color: textColor, opacity: 0.5 }}>
+              <span>Step {currentPage + 1} of {totalPages}</span>
+              <span>{Math.round(((currentPage + 1) / totalPages) * 100)}%</span>
+            </div>
+            <div className="w-full h-2 rounded-full" style={{ backgroundColor: textColor, opacity: 0.1 }}>
+              <div className="h-full rounded-full transition-all duration-300" style={{ width: `${((currentPage + 1) / totalPages) * 100}%`, backgroundColor: accentColor }} />
+            </div>
+          </div>
+        )}
+
         {/* Form */}
         <form onSubmit={handleSubmit} className="public-form flex flex-wrap gap-x-4 gap-y-5" style={{ color: textColor }}>
           {/* Honeypot - invisible to humans, catches bots */}
@@ -261,7 +327,7 @@ export default function PublicForm() {
             <label>Leave this empty</label>
             <input type="text" name="website_url" value={honeypot} onChange={e => setHoneypot(e.target.value)} autoComplete="off" />
           </div>
-          {(form.fields || []).map(field => {
+          {(form.fields || []).filter(f => (!isMultiPage || (f.page || 0) === currentPage) && isFieldVisible(f)).map(field => {
             const fw = field.width || 'full'
             const widthStyle = fw === 'half' ? 'calc(50% - 8px)' : fw === 'third' ? 'calc(33.33% - 8px)' : fw === 'quarter' ? 'calc(25% - 8px)' : fw === 'two-thirds' ? 'calc(66.66% - 8px)' : '100%'
             return (
@@ -495,15 +561,31 @@ export default function PublicForm() {
             </div>
           )}
 
-          {/* Submit Button */}
-          <button
-            type="submit"
-            disabled={submitting}
-            className="w-full py-3 rounded-lg text-sm font-semibold text-raven-950 transition-smooth hover:opacity-90 disabled:opacity-50"
-            style={{ backgroundColor: accentColor }}
-          >
-            {submitting ? 'Submitting...' : (form.settings?.submit_button_text || 'Submit')}
-          </button>
+          {/* Navigation / Submit */}
+          <div className="w-full flex gap-3">
+            {isMultiPage && currentPage > 0 && (
+              <button type="button" onClick={() => { setCurrentPage(p => p - 1); setError('') }}
+                className="flex-1 py-3 rounded-lg text-sm font-semibold transition-smooth hover:opacity-90 border-2"
+                style={{ borderColor: accentColor, color: accentColor }}>
+                Back
+              </button>
+            )}
+            {isMultiPage && currentPage < totalPages - 1 ? (
+              <button type="button" onClick={() => {
+                if (validatePage(currentPage)) { setCurrentPage(p => p + 1); setError(''); window.scrollTo({ top: 0, behavior: 'smooth' }) }
+              }}
+                className="flex-1 py-3 rounded-lg text-sm font-semibold text-raven-950 transition-smooth hover:opacity-90"
+                style={{ backgroundColor: accentColor }}>
+                Next
+              </button>
+            ) : (
+              <button type="submit" disabled={submitting}
+                className="flex-1 py-3 rounded-lg text-sm font-semibold text-raven-950 transition-smooth hover:opacity-90 disabled:opacity-50"
+                style={{ backgroundColor: accentColor }}>
+                {submitting ? 'Submitting...' : (form.settings?.submit_button_text || 'Submit')}
+              </button>
+            )}
+          </div>
         </form>
 
         {/* Footer */}

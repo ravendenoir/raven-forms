@@ -68,6 +68,10 @@ function createField(type) {
     step: type === 'slider' ? 1 : undefined,
     // Likert statement
     likertStatement: type === 'likert' ? 'Rate your experience' : undefined,
+    // Multi-page
+    page: 0,
+    // Conditional logic
+    conditions: [],
   }
 }
 
@@ -178,7 +182,7 @@ function FloatingToolbar({ field, onUpdate, onDelete, onDuplicate, fields }) {
       </button>
 
       {showSettings && (
-        <div className="absolute top-full left-0 mt-2 w-72 bg-white border border-raven-200 rounded-xl shadow-lg z-50 p-4 space-y-3" onClick={e => e.stopPropagation()}>
+        <div className="absolute top-full left-0 mt-2 w-80 bg-white border border-raven-200 rounded-xl shadow-lg z-50 p-4 space-y-3 max-h-[400px] overflow-y-auto" onClick={e => e.stopPropagation()}>
           {!isContent && !hasOptions && field.type !== 'rating' && field.type !== 'toggle' && field.type !== 'file' && (
             <div>
               <label className="block text-xs text-raven-500 mb-1 font-medium">Placeholder</label>
@@ -257,6 +261,58 @@ function FloatingToolbar({ field, onUpdate, onDelete, onDuplicate, fields }) {
                     className="w-full px-3 py-2 bg-white border border-raven-200 rounded-lg text-sm text-raven-50" />
                 </div>
               </div>
+            </div>
+          )}
+
+          {/* Conditional Logic */}
+          {!isContent && (
+            <div className="border-t border-raven-200 pt-3">
+              <label className="block text-xs text-raven-500 mb-2 font-medium">Show this field when...</label>
+              {(field.conditions || []).map((cond, ci) => {
+                const otherFields = fields.filter(f => f.id !== field.id && !['heading', 'banner_image', 'avatar_image', 'richtext', 'file', 'divider'].includes(f.type))
+                return (
+                  <div key={ci} className="flex items-center gap-1 mb-2">
+                    <select value={cond.fieldId || ''} onChange={e => {
+                      const c = [...(field.conditions || [])]; c[ci] = { ...c[ci], fieldId: e.target.value }; onUpdate({ ...field, conditions: c })
+                    }} className="flex-1 px-2 py-1 bg-white border border-raven-200 rounded text-[11px] text-raven-50">
+                      <option value="">Field...</option>
+                      {otherFields.map(f => <option key={f.id} value={f.id}>{f.label}</option>)}
+                    </select>
+                    <select value={cond.operator || 'equals'} onChange={e => {
+                      const c = [...(field.conditions || [])]; c[ci] = { ...c[ci], operator: e.target.value }; onUpdate({ ...field, conditions: c })
+                    }} className="px-2 py-1 bg-white border border-raven-200 rounded text-[11px] text-raven-50">
+                      <option value="equals">equals</option>
+                      <option value="not_equals">not equals</option>
+                      <option value="contains">contains</option>
+                      <option value="not_empty">has a value</option>
+                      <option value="is_empty">is empty</option>
+                    </select>
+                    {!['not_empty', 'is_empty'].includes(cond.operator) && (() => {
+                      const srcField = fields.find(f => f.id === cond.fieldId)
+                      if (srcField && ['select', 'radio'].includes(srcField.type)) {
+                        return (
+                          <select value={cond.value || ''} onChange={e => {
+                            const c = [...(field.conditions || [])]; c[ci] = { ...c[ci], value: e.target.value }; onUpdate({ ...field, conditions: c })
+                          }} className="flex-1 px-2 py-1 bg-white border border-raven-200 rounded text-[11px] text-raven-50">
+                            <option value="">Value...</option>
+                            {(srcField.options || []).map(o => <option key={o} value={o}>{o}</option>)}
+                          </select>
+                        )
+                      }
+                      return (
+                        <input type="text" value={cond.value || ''} placeholder="Value..." onChange={e => {
+                          const c = [...(field.conditions || [])]; c[ci] = { ...c[ci], value: e.target.value }; onUpdate({ ...field, conditions: c })
+                        }} className="flex-1 px-2 py-1 bg-white border border-raven-200 rounded text-[11px] text-raven-50" />
+                      )
+                    })()}
+                    <button onClick={() => {
+                      const c = (field.conditions || []).filter((_, j) => j !== ci); onUpdate({ ...field, conditions: c })
+                    }} className="p-0.5 text-raven-500 hover:text-red-500"><X className="w-3 h-3" /></button>
+                  </div>
+                )
+              })}
+              <button onClick={() => onUpdate({ ...field, conditions: [...(field.conditions || []), { fieldId: '', operator: 'equals', value: '' }] })}
+                className="text-xs text-raven-300 hover:text-raven-400 font-medium">+ Add condition</button>
             </div>
           )}
         </div>
@@ -886,6 +942,8 @@ export default function FormBuilder() {
   const [loading, setLoading] = useState(!isNew)
   const [showSettings, setShowSettings] = useState(false)
   const [showEmbed, setShowEmbed] = useState(false)
+  const [currentPage, setCurrentPage] = useState(0)
+  const [totalPages, setTotalPages] = useState(1)
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }))
 
@@ -906,6 +964,9 @@ export default function FormBuilder() {
         setSettings(s => ({ ...s, ...(form.settings || {}) }))
         setPublished(form.published)
         setSlug(form.slug)
+        // Compute total pages
+        const maxPage = (form.fields || []).reduce((max, f) => Math.max(max, f.page || 0), 0)
+        setTotalPages(maxPage + 1)
         setLoading(false)
       }).catch(() => { toast('Form not found', 'error'); navigate('/dashboard') })
     }
@@ -920,6 +981,7 @@ export default function FormBuilder() {
 
   function addFieldAt(type, position) {
     const f = createField(type)
+    f.page = currentPage
     setFields(prev => { const n = [...prev]; n.splice(position, 0, f); return n })
     setSelectedFieldId(f.id)
   }
@@ -1047,18 +1109,55 @@ export default function FormBuilder() {
           {formDescription && <p className="text-sm text-raven-500 mt-1">{formDescription}</p>}
         </div>
 
-        <AddFieldButton onAdd={addFieldAt} position={0} alwaysShow={fields.length < 3} />
+        {/* Page tabs */}
+        {totalPages > 1 && (
+          <div className="flex items-center gap-1 mb-4 pb-3 border-b border-raven-200">
+            {Array.from({ length: totalPages }, (_, i) => (
+              <button key={i} onClick={() => setCurrentPage(i)}
+                className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-smooth ${currentPage === i ? 'bg-raven-300 text-white' : 'text-raven-500 hover:bg-raven-900'}`}>
+                Page {i + 1}
+              </button>
+            ))}
+            <button onClick={() => { setTotalPages(p => p + 1); setCurrentPage(totalPages) }}
+              className="px-2 py-1.5 text-xs text-raven-500 hover:text-raven-300 transition-smooth" title="Add page">
+              <Plus className="w-3.5 h-3.5" />
+            </button>
+            {totalPages > 1 && (
+              <button onClick={() => {
+                if (fields.some(f => (f.page || 0) === currentPage)) {
+                  if (!confirm('Delete this page and all its fields?')) return
+                  setFields(prev => prev.filter(f => (f.page || 0) !== currentPage).map(f => ({ ...f, page: (f.page || 0) > currentPage ? (f.page || 0) - 1 : f.page || 0 })))
+                }
+                setTotalPages(p => Math.max(1, p - 1))
+                setCurrentPage(p => Math.min(p, totalPages - 2))
+              }}
+                className="px-2 py-1.5 text-xs text-raven-500 hover:text-red-500 transition-smooth ml-auto" title="Remove page">
+                <Trash2 className="w-3.5 h-3.5" />
+              </button>
+            )}
+          </div>
+        )}
+        {totalPages <= 1 && (
+          <div className="flex items-center gap-2 mb-4">
+            <button onClick={() => { setTotalPages(2); setCurrentPage(0) }}
+              className="text-xs text-raven-500 hover:text-raven-300 transition-smooth flex items-center gap-1">
+              <Plus className="w-3 h-3" /> Add pages for multi-step form
+            </button>
+          </div>
+        )}
+
+        <AddFieldButton onAdd={addFieldAt} position={0} alwaysShow={fields.filter(f => (f.page || 0) === currentPage).length < 3} />
 
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-          <SortableContext items={fields.map(f => f.id)} strategy={verticalListSortingStrategy}>
+          <SortableContext items={fields.filter(f => (f.page || 0) === currentPage).map(f => f.id)} strategy={verticalListSortingStrategy}>
             <div className="flex flex-wrap gap-2">
-              {fields.map((field, index) => (
+              {fields.filter(f => (f.page || 0) === currentPage).map((field, index) => (
                 <div key={field.id} className={field.width === 'full' || !field.width ? 'w-full' : ''}>
                   <SortableFormField field={field} isSelected={selectedFieldId === field.id}
                     onSelect={setSelectedFieldId} onUpdate={updateField} onDelete={deleteField}
                     onDuplicate={duplicateField} fields={fields} />
                   {field.width === 'full' || !field.width ? (
-                    <AddFieldButton onAdd={addFieldAt} position={index + 1} alwaysShow={fields.length < 3} />
+                    <AddFieldButton onAdd={addFieldAt} position={fields.indexOf(field) + 1} alwaysShow={fields.filter(f => (f.page || 0) === currentPage).length < 3} />
                   ) : null}
                 </div>
               ))}
@@ -1066,7 +1165,7 @@ export default function FormBuilder() {
           </SortableContext>
         </DndContext>
 
-        {fields.length === 0 && (
+        {fields.filter(f => (f.page || 0) === currentPage).length === 0 && (
           <div className="text-center py-12">
             <p className="text-raven-500 text-sm mb-1">Click the <strong>+</strong> button above to add your first field</p>
             <p className="text-raven-500/50 text-xs">Or choose a quick start below</p>
