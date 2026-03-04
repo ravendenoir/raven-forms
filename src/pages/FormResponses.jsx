@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { getForm, getSubmissions, deleteSubmission } from '../lib/supabase'
+import { getForm, getSubmissions, deleteSubmission, submitForm } from '../lib/supabase'
 import { useToast } from '../App'
 import {
-  ArrowLeft, Download, Trash2, Inbox, Clock,
+  ArrowLeft, Download, Upload, Trash2, Inbox, Clock,
   ChevronLeft, ChevronRight, ExternalLink
 } from 'lucide-react'
 
@@ -93,6 +93,84 @@ export default function FormResponses() {
     toast('CSV exported')
   }
 
+  // Import CSV
+  const [importing, setImporting] = useState(false)
+
+  async function handleImportCSV(e) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    e.target.value = '' // reset input
+
+    setImporting(true)
+    try {
+      const text = await file.text()
+      const lines = text.split('\n').map(line => {
+        const result = []
+        let current = ''
+        let inQuotes = false
+        for (let i = 0; i < line.length; i++) {
+          const ch = line[i]
+          if (ch === '"') {
+            if (inQuotes && line[i + 1] === '"') { current += '"'; i++ }
+            else inQuotes = !inQuotes
+          } else if (ch === ',' && !inQuotes) {
+            result.push(current.trim()); current = ''
+          } else {
+            current += ch
+          }
+        }
+        result.push(current.trim())
+        return result
+      }).filter(row => row.some(cell => cell.length > 0))
+
+      if (lines.length < 2) {
+        toast('CSV must have a header row and at least one data row', 'error')
+        setImporting(false)
+        return
+      }
+
+      const headers = lines[0]
+      let imported = 0
+      let skipped = 0
+
+      for (let i = 1; i < lines.length; i++) {
+        const row = lines[i]
+        if (row.length === 0 || (row.length === 1 && !row[0])) { skipped++; continue }
+
+        const data = {}
+        headers.forEach((header, idx) => {
+          const h = header.replace(/^["']|["']$/g, '').trim()
+          if (h && h.toLowerCase() !== 'submitted at' && h.toLowerCase() !== 'submitted') {
+            data[h] = row[idx] || ''
+          }
+        })
+
+        if (Object.values(data).some(v => v)) {
+          try {
+            await submitForm(id, data, { source: 'csv_import' })
+            imported++
+          } catch (err) {
+            console.error('Failed to import row', i, err)
+            skipped++
+          }
+        } else {
+          skipped++
+        }
+      }
+
+      // Refresh submissions
+      const subs = await getSubmissions(id)
+      setSubmissions(subs)
+
+      toast(`Imported ${imported} records${skipped > 0 ? ` (${skipped} skipped)` : ''}`)
+    } catch (err) {
+      console.error('Import error:', err)
+      toast('Failed to import CSV: ' + (err.message || 'Unknown error'), 'error')
+    } finally {
+      setImporting(false)
+    }
+  }
+
   // Pagination
   const totalPages = Math.ceil(submissions.length / perPage)
   const pageSubmissions = submissions.slice(page * perPage, (page + 1) * perPage)
@@ -176,6 +254,14 @@ export default function FormResponses() {
               Delete ({selectedIds.size})
             </button>
           )}
+          <label
+            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition-smooth cursor-pointer
+              border border-raven-200 text-raven-500 hover:bg-raven-900 ${importing ? 'opacity-50 pointer-events-none' : ''}`}
+          >
+            <Upload className="w-3.5 h-3.5" />
+            {importing ? 'Importing...' : 'Import CSV'}
+            <input type="file" accept=".csv" className="sr-only" onChange={handleImportCSV} disabled={importing} />
+          </label>
           <button
             onClick={exportCSV}
             disabled={submissions.length === 0}
