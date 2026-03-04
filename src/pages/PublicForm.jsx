@@ -65,7 +65,7 @@ export default function PublicForm() {
   function validate() {
     const newErrors = {}
     ;(form.fields || []).forEach(field => {
-      if (field.required && !['heading', 'banner_image', 'avatar_image', 'richtext'].includes(field.type)) {
+      if (field.required && !['heading', 'banner_image', 'avatar_image', 'richtext', 'file'].includes(field.type)) {
         const val = values[field.id]
         if (field.type === 'checkbox' && (!val || val.length === 0)) {
           newErrors[field.id] = 'Please select at least one option'
@@ -110,7 +110,7 @@ export default function PublicForm() {
       // Build submission data with field labels
       const submissionData = {}
       ;(form.fields || []).forEach(field => {
-        if (!['heading', 'banner_image', 'avatar_image', 'richtext'].includes(field.type)) {
+        if (!['heading', 'banner_image', 'avatar_image', 'richtext', 'file'].includes(field.type)) {
           if (field.type === 'file' && fileUrls[field.id]) {
             submissionData[field.label] = fileUrls[field.id]
           } else {
@@ -238,6 +238,12 @@ export default function PublicForm() {
                   }} />
               ) : field.type === 'heading' ? (
                 <h3 className="font-display text-lg font-semibold pt-2" style={{ color: textColor }}>{field.label}</h3>
+              ) : field.type === 'file' ? (
+                field.imageUrl ? (
+                  <img src={field.imageUrl} alt={field.label || 'Image'}
+                    className="rounded-lg object-contain"
+                    style={field.imageWidthPx > 0 ? { width: `${field.imageWidthPx}px`, height: 'auto' } : { maxWidth: '100%', height: 'auto' }} />
+                ) : null
               ) : (
                 <div>
                   <label className="block text-sm mb-1.5 font-medium" style={{ color: textColor }}>
@@ -362,38 +368,6 @@ export default function PublicForm() {
                         values[field.id] ? 'left-6' : 'left-0.5'
                       }`} />
                     </button>
-                  )}
-
-                  {/* File Upload */}
-                  {field.type === 'file' && (
-                    <div>
-                      {fileData[field.id] ? (
-                        <div className="border border-raven-200 rounded-lg p-3 flex items-center gap-3">
-                          {fileData[field.id].preview && (
-                            <img src={fileData[field.id].preview} alt="Preview" className="w-12 h-12 object-cover rounded" />
-                          )}
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm text-raven-50 truncate">{fileData[field.id].file.name}</p>
-                            <p className="text-xs text-raven-500/70">{(fileData[field.id].file.size / 1024 / 1024).toFixed(1)} MB</p>
-                          </div>
-                          <button type="button" onClick={() => removeFile(field.id)} className="p-1 text-raven-500/70 hover:text-red-400 transition-smooth">
-                            <X className="w-4 h-4" />
-                          </button>
-                        </div>
-                      ) : (
-                        <label className="block border-2 border-dashed border-raven-200 rounded-lg p-6 text-center cursor-pointer hover:border-raven-300/30 transition-smooth">
-                          <Upload className="w-6 h-6 mx-auto mb-2" style={{ color: accentColor }} />
-                          <p className="text-sm text-raven-500">Upload an image</p>
-                          <p className="text-xs text-raven-500/50 mt-1">PNG or JPEG — Max {field.maxSizeMB || 10}MB</p>
-                          <input
-                            type="file"
-                            className="sr-only"
-                            accept={field.accept || 'image/png,image/jpeg,image/jpg'}
-                            onChange={e => handleFileChange(field.id, e.target.files?.[0], field)}
-                          />
-                        </label>
-                      )}
-                    </div>
                   )}
 
                   {/* Error */}

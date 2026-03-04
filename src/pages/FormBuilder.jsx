@@ -35,7 +35,7 @@ const FIELD_TYPES = [
   { type: 'checkbox', label: 'Checkboxes', icon: CheckSquare, category: 'input' },
   { type: 'rating', label: 'Rating', icon: Star, category: 'input' },
   { type: 'toggle', label: 'Yes / No', icon: ToggleLeft, category: 'input' },
-  { type: 'file', label: 'Image Upload', icon: Upload, category: 'input' },
+  { type: 'file', label: 'Image', icon: Upload, category: 'content' },
 ]
 
 function createField(type) {
@@ -48,11 +48,13 @@ function createField(type) {
     required: false,
     options: ['select', 'radio', 'checkbox'].includes(type) ? ['Option 1', 'Option 2'] : [],
     description: '',
-    accept: type === 'file' ? 'image/png,image/jpeg,image/jpg' : '',
-    maxSizeMB: type === 'file' ? 10 : 0,
+    accept: '',
+    maxSizeMB: 0,
     width: type === 'banner_image' ? 'full' : type === 'avatar_image' ? 'full' : 'full',
     content: type === 'richtext' ? 'Click to edit this text block...' : '',
     imageUrl: '',
+    imageWidthPx: 0,
+    imagePositionY: 50,
   }
 }
 
@@ -117,7 +119,7 @@ function FloatingToolbar({ field, onUpdate, onDelete, onDuplicate, fields }) {
   const [showSettings, setShowSettings] = useState(false)
   const ref = useRef(null)
   const hasOptions = ['select', 'radio', 'checkbox'].includes(field.type)
-  const isContent = ['heading', 'banner_image', 'avatar_image', 'richtext'].includes(field.type)
+  const isContent = ['heading', 'banner_image', 'avatar_image', 'richtext', 'file'].includes(field.type)
   const hasWidth = !['banner_image'].includes(field.type)
 
   useEffect(() => {
@@ -171,7 +173,7 @@ function FloatingToolbar({ field, onUpdate, onDelete, onDuplicate, fields }) {
                 className="w-full px-3 py-2 bg-white border border-raven-200 rounded-lg text-sm text-raven-50" />
             </div>
           )}
-          {!['banner_image', 'avatar_image'].includes(field.type) && (
+          {!['banner_image', 'avatar_image', 'file'].includes(field.type) && (
             <div>
               <label className="block text-xs text-raven-500 mb-1 font-medium">Help text</label>
               <input type="text" value={field.description || ''} onChange={e => onUpdate({ ...field, description: e.target.value })}
@@ -196,20 +198,6 @@ function FloatingToolbar({ field, onUpdate, onDelete, onDuplicate, fields }) {
                   className="text-xs text-raven-300 hover:text-raven-400 font-medium">+ Add option</button>
               </div>
             </div>
-          )}
-          {field.type === 'file' && (
-            <>
-              <div>
-                <label className="block text-xs text-raven-500 mb-1 font-medium">Accepted File Types</label>
-                <input type="text" value={field.accept || 'image/png,image/jpeg,image/jpg'} onChange={e => onUpdate({ ...field, accept: e.target.value })}
-                  className="w-full px-3 py-2 bg-white border border-raven-200 rounded-lg text-sm text-raven-50 font-mono" />
-              </div>
-              <div>
-                <label className="block text-xs text-raven-500 mb-1 font-medium">Max Size (MB)</label>
-                <input type="number" value={field.maxSizeMB || 10} onChange={e => onUpdate({ ...field, maxSizeMB: parseInt(e.target.value) || 10 })}
-                  min={1} max={50} className="w-full px-3 py-2 bg-white border border-raven-200 rounded-lg text-sm text-raven-50" />
-              </div>
-            </>
           )}
         </div>
       )}
@@ -277,10 +265,12 @@ function InlineRichText({ value, onChange }) {
 // ─── Image Upload Block (for builder) ────────────
 function ImageUploadBlock({ field, onUpdate, type }) {
   const [uploading, setUploading] = useState(false)
+  const [resizing, setResizing] = useState(false)
   const inputRef = useRef(null)
+  const imgContainerRef = useRef(null)
   const isBanner = type === 'banner_image'
   const isAvatar = type === 'avatar_image'
-  const isFileUpload = type === 'file_upload'
+  const isImage = type === 'file_upload'
 
   async function handleFile(e) {
     const file = e.target.files?.[0]
@@ -297,39 +287,88 @@ function ImageUploadBlock({ field, onUpdate, type }) {
     }
   }
 
+  function startResize(e) {
+    e.preventDefault()
+    e.stopPropagation()
+    setResizing(true)
+    const startX = e.clientX
+    const startWidth = imgContainerRef.current?.offsetWidth || 400
+
+    function onMove(ev) {
+      const delta = ev.clientX - startX
+      const newWidth = Math.max(100, Math.min(startWidth + delta, 800))
+      onUpdate({ ...field, imageWidthPx: newWidth })
+    }
+    function onUp() {
+      setResizing(false)
+      document.removeEventListener('mousemove', onMove)
+      document.removeEventListener('mouseup', onUp)
+    }
+    document.addEventListener('mousemove', onMove)
+    document.addEventListener('mouseup', onUp)
+  }
+
   if (field.imageUrl) {
     const posY = field.imagePositionY ?? 50
 
-    return (
-      <div className="relative group/img">
-        {isBanner ? (
-          <div>
-            <img src={field.imageUrl} alt="Banner" className="w-full h-48 object-cover rounded-lg"
-              style={{ objectPosition: `center ${posY}%` }} />
-            {/* Position slider */}
-            <div className="flex items-center gap-2 mt-2 opacity-0 group-hover/img:opacity-100 transition-smooth">
-              <span className="text-[10px] text-raven-500 shrink-0">Position</span>
-              <input type="range" min="0" max="100" value={posY}
-                onChange={e => onUpdate({ ...field, imagePositionY: parseInt(e.target.value) })}
-                className="flex-1 h-1 accent-raven-300 cursor-pointer" />
-            </div>
+    if (isBanner) {
+      return (
+        <div className="relative group/img">
+          <img src={field.imageUrl} alt="Banner" className="w-full h-48 object-cover rounded-lg"
+            style={{ objectPosition: `center ${posY}%` }} />
+          <div className="flex items-center gap-2 mt-2 opacity-0 group-hover/img:opacity-100 transition-smooth">
+            <span className="text-[10px] text-raven-500 shrink-0">Position</span>
+            <input type="range" min="0" max="100" value={posY}
+              onChange={e => onUpdate({ ...field, imagePositionY: parseInt(e.target.value) })}
+              className="flex-1 h-1 accent-raven-300 cursor-pointer" />
           </div>
-        ) : isAvatar ? (
+          <button onClick={() => onUpdate({ ...field, imageUrl: '' })}
+            className="absolute top-2 right-2 p-1.5 bg-white/90 rounded-full text-raven-500 hover:text-red-500 opacity-0 group-hover/img:opacity-100 transition-smooth shadow">
+            <X className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      )
+    }
+
+    if (isAvatar) {
+      return (
+        <div className="relative group/img">
           <div className="flex items-center gap-3">
             <img src={field.imageUrl} alt="Avatar" className="w-20 h-20 rounded-full object-cover border-2 border-white shadow" />
             <span className="text-xs text-raven-500">Avatar image</span>
           </div>
-        ) : (
-          <div className="flex items-center gap-3 bg-raven-900 border border-raven-200 rounded-lg p-3">
-            <img src={field.imageUrl} alt="Uploaded" className="w-16 h-16 object-cover rounded-lg" />
-            <div className="flex-1 min-w-0">
-              <p className="text-sm text-raven-50 truncate">Image uploaded</p>
-              <p className="text-xs text-raven-500">Click × to remove</p>
-            </div>
+          <button onClick={() => onUpdate({ ...field, imageUrl: '' })}
+            className="absolute top-2 right-2 p-1.5 bg-white/90 rounded-full text-raven-500 hover:text-red-500 opacity-0 group-hover/img:opacity-100 transition-smooth shadow">
+            <X className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      )
+    }
+
+    // Regular image — full size with resize handle
+    const imgWidth = field.imageWidthPx || 0
+    return (
+      <div className="relative group/img">
+        <div ref={imgContainerRef} className="relative inline-block"
+          style={imgWidth > 0 ? { width: `${imgWidth}px` } : {}}>
+          <img src={field.imageUrl} alt="Uploaded"
+            className="rounded-lg object-contain"
+            style={imgWidth > 0 ? { width: '100%', height: 'auto' } : { maxWidth: '100%', height: 'auto' }} />
+          {/* Right resize handle */}
+          <div onMouseDown={startResize}
+            className="absolute top-0 right-0 w-3 h-full cursor-ew-resize opacity-0 group-hover/img:opacity-100 transition-smooth flex items-center justify-center"
+            style={{ transform: 'translateX(50%)' }}>
+            <div className="w-1 h-8 bg-raven-300 rounded-full" />
           </div>
-        )}
+          {/* Bottom-right corner resize handle */}
+          <div onMouseDown={startResize}
+            className="absolute bottom-0 right-0 w-4 h-4 cursor-nwse-resize opacity-0 group-hover/img:opacity-100 transition-smooth"
+            style={{ transform: 'translate(25%, 25%)' }}>
+            <div className="w-3 h-3 border-r-2 border-b-2 border-raven-300 rounded-br" />
+          </div>
+        </div>
         <button onClick={() => onUpdate({ ...field, imageUrl: '' })}
-          className="absolute top-2 right-2 p-1.5 bg-white/90 rounded-full text-raven-500 hover:text-red-500 opacity-0 group-hover/img:opacity-100 transition-smooth shadow">
+          className="absolute top-2 right-2 p-1.5 bg-white/90 rounded-full text-raven-500 hover:text-red-500 opacity-0 group-hover/img:opacity-100 transition-smooth shadow z-10">
           <X className="w-3.5 h-3.5" />
         </button>
       </div>
@@ -386,6 +425,8 @@ function SortableFormField({ field, isSelected, onSelect, onUpdate, onDelete, on
         ) : field.type === 'heading' ? (
           <InlineLabel value={field.label} onChange={val => onUpdate({ ...field, label: val })}
             className="font-display text-lg font-semibold text-raven-50" placeholder="Section heading..." />
+        ) : field.type === 'file' ? (
+          <ImageUploadBlock field={field} onUpdate={onUpdate} type="file_upload" />
         ) : (
           <>
             <div className="mb-2">
@@ -425,8 +466,6 @@ function SortableFormField({ field, isSelected, onSelect, onUpdate, onDelete, on
               <div className="w-11 h-6 rounded-full bg-gray-300 relative">
                 <div className="w-5 h-5 rounded-full bg-white shadow absolute top-0.5 left-0.5" />
               </div>
-            ) : field.type === 'file' ? (
-              <ImageUploadBlock field={field} onUpdate={onUpdate} type="file_upload" />
             ) : (
               <input type={field.type === 'email' ? 'email' : field.type === 'number' ? 'number' : field.type === 'date' ? 'date' : 'text'}
                 placeholder={field.placeholder || 'Type here...'} readOnly
