@@ -65,7 +65,7 @@ export default function PublicForm() {
   function validate() {
     const newErrors = {}
     ;(form.fields || []).forEach(field => {
-      if (field.required && field.type !== 'heading') {
+      if (field.required && !['heading', 'banner_image', 'avatar_image', 'richtext'].includes(field.type)) {
         const val = values[field.id]
         if (field.type === 'checkbox' && (!val || val.length === 0)) {
           newErrors[field.id] = 'Please select at least one option'
@@ -110,7 +110,7 @@ export default function PublicForm() {
       // Build submission data with field labels
       const submissionData = {}
       ;(form.fields || []).forEach(field => {
-        if (field.type !== 'heading') {
+        if (!['heading', 'banner_image', 'avatar_image', 'richtext'].includes(field.type)) {
           if (field.type === 'file' && fileUrls[field.id]) {
             submissionData[field.label] = fileUrls[field.id]
           } else {
@@ -152,11 +152,17 @@ export default function PublicForm() {
     }
   }
 
+  // ─── Colors ───────────────────────────────────
+  const accentColor = form?.settings?.accent_color || '#b8923e'
+  const bgColor = form?.settings?.background_color || '#faf7f2'
+  const textColor = form?.settings?.text_color || '#2a2520'
+  const cardColor = form?.settings?.card_color || '#ffffff'
+
   // ─── Loading State ───────────────────────────
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center"
-        style={{ background: 'radial-gradient(ellipse at 50% 0%, #f3efe8 0%, #faf7f2 70%)' }}>
+        style={{ backgroundColor: bgColor }}>
         <Loader2 className="w-6 h-6 text-raven-300 animate-spin" />
       </div>
     )
@@ -166,7 +172,7 @@ export default function PublicForm() {
   if (error && !form) {
     return (
       <div className="min-h-screen flex items-center justify-center px-4"
-        style={{ background: 'radial-gradient(ellipse at 50% 0%, #f3efe8 0%, #faf7f2 70%)' }}>
+        style={{ backgroundColor: bgColor }}>
         <div className="text-center">
           <AlertCircle className="w-10 h-10 text-red-400/60 mx-auto mb-3" />
           <p className="text-raven-500 text-sm">{error}</p>
@@ -175,13 +181,12 @@ export default function PublicForm() {
     )
   }
 
-  const accentColor = form?.settings?.accent_color || '#c9a55c'
 
   // ─── Thank You State ─────────────────────────
   if (submitted) {
     return (
       <div className="min-h-screen flex items-center justify-center px-4"
-        style={{ background: 'radial-gradient(ellipse at 50% 0%, #f3efe8 0%, #faf7f2 70%)' }}>
+        style={{ backgroundColor: bgColor }}>
         <div className="text-center max-w-md">
           <CheckCircle2 className="w-12 h-12 mx-auto mb-4" style={{ color: accentColor }} />
           <h2 className="font-display text-2xl font-bold text-raven-50 mb-2">
@@ -196,25 +201,45 @@ export default function PublicForm() {
   // ─── Form Render ─────────────────────────────
   return (
     <div className="min-h-screen py-8 px-4"
-      style={{ background: 'radial-gradient(ellipse at 50% 0%, #f3efe8 0%, #faf7f2 70%)' }}>
+      style={{ backgroundColor: bgColor }}>
       <div className="max-w-xl mx-auto">
         {/* Header */}
         <div className="mb-6">
-          <h1 className="font-display text-2xl font-bold text-raven-50">{form.title}</h1>
+          <h1 className="font-display text-2xl font-bold" style={{ color: textColor }}>{form.title}</h1>
           {form.description && (
             <p className="text-raven-500 text-sm mt-1">{form.description}</p>
           )}
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="public-form space-y-5">
+        <form onSubmit={handleSubmit} className="public-form space-y-5" style={{ color: textColor }}>
           {(form.fields || []).map(field => (
             <div key={field.id}>
-              {field.type === 'heading' ? (
-                <h3 className="font-display text-lg font-semibold text-raven-50 pt-2">{field.label}</h3>
+              {/* Banner Image */}
+              {field.type === 'banner_image' ? (
+                field.imageUrl ? (
+                  <img src={field.imageUrl} alt="Banner" className="w-full h-auto rounded-lg object-cover" style={{ maxHeight: '300px' }} />
+                ) : null
+              ) : field.type === 'avatar_image' ? (
+                field.imageUrl ? (
+                  <div className="flex items-center gap-3">
+                    <img src={field.imageUrl} alt="Avatar" className="w-20 h-20 rounded-full object-cover border-2 border-white shadow" />
+                  </div>
+                ) : null
+              ) : field.type === 'richtext' ? (
+                <div className="text-sm leading-relaxed prose prose-sm max-w-none"
+                  dangerouslySetInnerHTML={{
+                    __html: (field.content || '').split('\n').map(line => {
+                      let p = line.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+                      if (/^[-•*]\s/.test(line)) return `<ul class="list-disc ml-5"><li>${p.replace(/^[-•*]\s/, '')}</li></ul>`
+                      return `<p>${p}</p>`
+                    }).join('')
+                  }} />
+              ) : field.type === 'heading' ? (
+                <h3 className="font-display text-lg font-semibold pt-2" style={{ color: textColor }}>{field.label}</h3>
               ) : (
                 <div>
-                  <label className="block text-sm text-raven-50 mb-1.5 font-medium">
+                  <label className="block text-sm mb-1.5 font-medium" style={{ color: textColor }}>
                     {field.label}
                     {field.required && <span style={{ color: accentColor }} className="ml-1">*</span>}
                   </label>
