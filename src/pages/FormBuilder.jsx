@@ -14,7 +14,7 @@ import {
   Save, ArrowLeft, Type, AlignLeft, AlignCenter, AlignRight, ChevronDown,
   CheckSquare, Circle, Hash, Mail, Phone, Calendar,
   Link2, Star, Upload, Download, ToggleLeft, List, X,
-  ExternalLink, Image, UserCircle, FileText,
+  ExternalLink, Image, UserCircle, FileText, Code2,
   Columns, Loader2, Bold, Italic, Underline,
   ListOrdered, Quote, Palette, ImagePlus
 } from 'lucide-react'
@@ -800,6 +800,7 @@ export default function FormBuilder() {
   const [saving, setSaving] = useState(false)
   const [loading, setLoading] = useState(!isNew)
   const [showSettings, setShowSettings] = useState(false)
+  const [showEmbed, setShowEmbed] = useState(false)
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }))
 
@@ -935,6 +936,11 @@ export default function FormBuilder() {
             <input type="file" accept=".json" className="sr-only" onChange={importFormJSON} />
           </label>
           {slug && published && (
+            <button onClick={() => setShowEmbed(true)} className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-raven-500 hover:text-raven-50 border border-raven-200 rounded-lg transition-smooth" title="Get embed code">
+              <Code2 className="w-3.5 h-3.5" /> Embed
+            </button>
+          )}
+          {slug && published && (
             <button onClick={() => window.open(`/f/${slug}`, '_blank')} className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-raven-500 hover:text-raven-50 border border-raven-200 rounded-lg transition-smooth">
               <ExternalLink className="w-3.5 h-3.5" /> View Live
             </button>
@@ -1005,6 +1011,31 @@ export default function FormBuilder() {
 
       {showSettings && <SettingsModal settings={settings} onUpdate={setSettings} onClose={() => setShowSettings(false)}
         formDescription={formDescription} onDescriptionChange={setFormDescription} />}
+
+      {showEmbed && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={() => setShowEmbed(false)}>
+          <div className="bg-white border border-raven-200 rounded-2xl shadow-xl w-full max-w-lg p-6 space-y-4" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between">
+              <h3 className="font-display text-lg font-semibold text-raven-50">Embed Code</h3>
+              <button onClick={() => setShowEmbed(false)} className="text-raven-500 hover:text-raven-50"><X className="w-4 h-4" /></button>
+            </div>
+            <p className="text-xs text-raven-500">Copy and paste this code into your website, blog, or landing page.</p>
+            <div className="space-y-3">
+              <label className="block text-xs text-raven-500 font-medium">iFrame Embed</label>
+              <textarea readOnly rows={3}
+                className="w-full px-3 py-2 bg-raven-900 border border-raven-200 rounded-lg text-xs text-raven-50 font-mono"
+                value={`<iframe src="${window.location.origin}/f/${slug}" width="100%" height="800" frameborder="0" style="border:none;border-radius:12px;"></iframe>`}
+                onClick={e => { e.target.select(); navigator.clipboard?.writeText(e.target.value); toast('Copied to clipboard') }} />
+              <label className="block text-xs text-raven-500 font-medium">Direct Link</label>
+              <input readOnly
+                className="w-full px-3 py-2 bg-raven-900 border border-raven-200 rounded-lg text-xs text-raven-50 font-mono"
+                value={`${window.location.origin}/f/${slug}`}
+                onClick={e => { e.target.select(); navigator.clipboard?.writeText(e.target.value); toast('Copied to clipboard') }} />
+            </div>
+            <button onClick={() => setShowEmbed(false)} className="w-full py-2.5 bg-raven-300 text-white font-semibold rounded-lg hover:bg-raven-400 transition-smooth text-sm">Done</button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

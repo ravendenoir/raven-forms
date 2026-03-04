@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
-import { getFormBySlug, submitForm, uploadFile, triggerMailchimp, triggerNotification, triggerWelcomeEmail } from '../lib/supabase'
+import { getFormBySlug, submitForm, uploadFile, triggerMailchimp, triggerNotification, triggerWelcomeEmail, checkDuplicateEmailByField, trackFormView } from '../lib/supabase'
 import { Feather, Star, CheckCircle2, AlertCircle, Loader2, Upload, X } from 'lucide-react'
 
 export default function PublicForm() {
@@ -13,6 +13,7 @@ export default function PublicForm() {
   const [values, setValues] = useState({})
   const [fileData, setFileData] = useState({}) // { fieldId: { file, preview } }
   const [errors, setErrors] = useState({})
+  const [honeypot, setHoneypot] = useState('')
 
   useEffect(() => {
     loadForm()
@@ -22,6 +23,8 @@ export default function PublicForm() {
     try {
       const data = await getFormBySlug(slug)
       setForm(data)
+      // Track view
+      trackFormView(data.id)
       // Initialize values
       const initial = {}
       ;(data.fields || []).forEach(field => {
@@ -92,8 +95,30 @@ export default function PublicForm() {
     e.preventDefault()
     if (!validate()) return
 
+    // Honeypot - bots fill this in, humans don't see it
+    if (honeypot) {
+      setSubmitted(true) // silently fake success
+      return
+    }
+
     setSubmitting(true)
     try {
+      const settings = form.settings || {}
+
+      // Duplicate email check
+      const emailField = (form.fields || []).find(f => f.type === 'email' || f.label?.toLowerCase() === 'email')
+      if (emailField) {
+        const emailVal = values[emailField.id]
+        if (emailVal) {
+          const isDupe = await checkDuplicateEmailByField(form.id, emailField.label, emailVal)
+          if (isDupe) {
+            setError('This email has already been submitted.')
+            setSubmitting(false)
+            return
+          }
+        }
+      }
+
       // Upload any files first
       const fileUrls = {}
       for (const [fieldId, { file }] of Object.entries(fileData)) {
@@ -126,7 +151,6 @@ export default function PublicForm() {
       })
 
       // Trigger Mailchimp if enabled
-      const settings = form.settings || {}
       if (settings.mailchimp_enabled && settings.mailchimp_email_field) {
         const emailValue = values[settings.mailchimp_email_field]
         if (emailValue) {
@@ -232,6 +256,11 @@ export default function PublicForm() {
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="public-form space-y-5" style={{ color: textColor }}>
+          {/* Honeypot - invisible to humans, catches bots */}
+          <div style={{ position: 'absolute', left: '-9999px', opacity: 0, height: 0, overflow: 'hidden' }} aria-hidden="true" tabIndex={-1}>
+            <label>Leave this empty</label>
+            <input type="text" name="website_url" value={honeypot} onChange={e => setHoneypot(e.target.value)} autoComplete="off" />
+          </div>
           {(form.fields || []).map(field => (
             <div key={field.id}>
               {/* Banner Image */}

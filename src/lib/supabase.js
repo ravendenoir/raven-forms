@@ -189,3 +189,44 @@ export async function triggerWelcomeEmail(to, subject, body, fromName) {
     console.warn('Welcome email failed:', e)
   }
 }
+
+// ─── Duplicate Check ─────────────────────────────
+
+export async function checkDuplicateEmail(formId, email) {
+  const { data, error } = await supabase
+    .from('submissions')
+    .select('id')
+    .eq('form_id', formId)
+    .limit(500)
+  if (error) return false // fail open
+  // Check if any submission has this email in its data values
+  const emailLower = email.toLowerCase().trim()
+  return data.some(sub => {
+    const d = sub.data || sub
+    // submissions store data as JSONB with field labels as keys
+    return false
+  })
+}
+
+export async function checkDuplicateEmailByField(formId, fieldLabel, email) {
+  const { data, error } = await supabase
+    .from('submissions')
+    .select('data')
+    .eq('form_id', formId)
+  if (error) return false
+  const emailLower = email.toLowerCase().trim()
+  return data.some(row => {
+    const val = row.data?.[fieldLabel]
+    return val && val.toLowerCase().trim() === emailLower
+  })
+}
+
+// ─── View Tracking ───────────────────────────────
+
+export async function trackFormView(formId) {
+  try {
+    await supabase.rpc('increment_view_count', { form_id_input: formId })
+  } catch (e) {
+    console.warn('View tracking failed:', e)
+  }
+}

@@ -262,6 +262,12 @@ export default function FormResponses() {
             <h1 className="font-display text-xl font-bold text-raven-50">{form?.title}</h1>
             <p className="text-raven-500/80 text-xs mt-0.5">
               {submissions.length} response{submissions.length !== 1 ? 's' : ''}
+              {form?.view_count > 0 && (
+                <span className="ml-2 text-raven-500/60">
+                  · {form.view_count} view{form.view_count !== 1 ? 's' : ''}
+                  · {((submissions.length / form.view_count) * 100).toFixed(1)}% conversion
+                </span>
+              )}
               {form?.slug && (
                 <button
                   onClick={() => window.open(`/f/${form.slug}`, '_blank')}
