@@ -232,6 +232,23 @@ export default function PublicForm() {
         }
       }
 
+      // Trigger webhook
+      if (settings.webhook_enabled && settings.webhook_url) {
+        try {
+          fetch(settings.webhook_url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            mode: 'no-cors',
+            body: JSON.stringify({
+              form_id: form.id,
+              form_title: form.title,
+              submitted_at: new Date().toISOString(),
+              data: submissionData,
+            }),
+          })
+        } catch (err) { console.error('Webhook error:', err) }
+      }
+
       // Handle thank you
       if (settings.thank_you_url) {
         window.location.href = settings.thank_you_url

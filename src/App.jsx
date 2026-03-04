@@ -142,7 +142,7 @@ function AdminLayout({ children }) {
 
           <div className="flex items-center gap-3">
             <button
-              onClick={() => navigate('/forms/new')}
+              onClick={() => navigate('/dashboard?templates=1')}
               className="flex items-center gap-1.5 px-3 py-1.5 bg-raven-300 hover:bg-raven-200 text-raven-950 text-sm font-semibold rounded-lg transition-smooth"
             >
               <Plus className="w-4 h-4" />

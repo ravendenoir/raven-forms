@@ -990,6 +990,31 @@ function SettingsModal({ settings, onUpdate, onClose, formDescription, onDescrip
             </div>
           )}
         </div>
+
+        {/* Webhooks */}
+        <div className="border-t border-raven-200 pt-4 space-y-3">
+          <h4 className="text-xs text-raven-500 font-medium">Webhooks</h4>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs text-raven-50 font-medium">Send data to webhook</p>
+              <p className="text-[10px] text-raven-500/60">POST submission data to a URL on every response</p>
+            </div>
+            <button onClick={() => onUpdate({ ...settings, webhook_enabled: !settings.webhook_enabled })}
+              className={`w-10 h-5 rounded-full transition-smooth relative ${settings.webhook_enabled ? 'bg-raven-300' : 'bg-gray-300'}`}>
+              <div className={`w-4 h-4 rounded-full bg-white shadow absolute top-0.5 transition-smooth ${settings.webhook_enabled ? 'left-5' : 'left-0.5'}`} />
+            </button>
+          </div>
+          {settings.webhook_enabled && (
+            <div>
+              <label className="block text-xs text-raven-500 mb-1 font-medium">Webhook URL</label>
+              <input type="url" value={settings.webhook_url || ''} onChange={e => onUpdate({ ...settings, webhook_url: e.target.value })}
+                placeholder="https://hooks.zapier.com/... or https://hook.us1.make.com/..."
+                className="w-full px-3 py-2 bg-white border border-raven-200 rounded-lg text-sm text-raven-50" />
+              <p className="text-[10px] text-raven-500/60 mt-1">Works with Zapier, Make, n8n, or any URL that accepts POST requests with JSON body</p>
+            </div>
+          )}
+        </div>
+
         <button onClick={onClose} className="w-full py-2.5 bg-raven-300 text-white font-semibold rounded-lg hover:bg-raven-400 transition-smooth text-sm">Done</button>
       </div>
     </div>
@@ -1026,6 +1051,8 @@ export default function FormBuilder() {
     show_score: false,
     show_correct_answers: false,
     show_poll_results: false,
+    webhook_url: '',
+    webhook_enabled: false,
   })
   const [published, setPublished] = useState(false)
   const [slug, setSlug] = useState('')
