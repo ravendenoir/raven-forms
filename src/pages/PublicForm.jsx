@@ -382,12 +382,12 @@ export default function PublicForm() {
                       ) : (
                         <label className="block border-2 border-dashed border-raven-200 rounded-lg p-6 text-center cursor-pointer hover:border-raven-300/30 transition-smooth">
                           <Upload className="w-6 h-6 mx-auto mb-2" style={{ color: accentColor }} />
-                          <p className="text-sm text-raven-500">Click to upload</p>
-                          <p className="text-xs text-raven-500/50 mt-1">Max {field.maxSizeMB || 10}MB</p>
+                          <p className="text-sm text-raven-500">Upload an image</p>
+                          <p className="text-xs text-raven-500/50 mt-1">PNG or JPEG — Max {field.maxSizeMB || 10}MB</p>
                           <input
                             type="file"
                             className="sr-only"
-                            accept={field.accept || 'image/*,.pdf,.doc,.docx'}
+                            accept={field.accept || 'image/png,image/jpeg,image/jpg'}
                             onChange={e => handleFileChange(field.id, e.target.files?.[0], field)}
                           />
                         </label>

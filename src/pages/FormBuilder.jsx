@@ -35,7 +35,7 @@ const FIELD_TYPES = [
   { type: 'checkbox', label: 'Checkboxes', icon: CheckSquare, category: 'input' },
   { type: 'rating', label: 'Rating', icon: Star, category: 'input' },
   { type: 'toggle', label: 'Yes / No', icon: ToggleLeft, category: 'input' },
-  { type: 'file', label: 'File Upload', icon: Upload, category: 'input' },
+  { type: 'file', label: 'Image Upload', icon: Upload, category: 'input' },
 ]
 
 function createField(type) {
@@ -48,7 +48,7 @@ function createField(type) {
     required: false,
     options: ['select', 'radio', 'checkbox'].includes(type) ? ['Option 1', 'Option 2'] : [],
     description: '',
-    accept: type === 'file' ? 'image/*,.pdf,.doc,.docx' : '',
+    accept: type === 'file' ? 'image/png,image/jpeg,image/jpg' : '',
     maxSizeMB: type === 'file' ? 10 : 0,
     width: type === 'banner_image' ? 'full' : type === 'avatar_image' ? 'full' : 'full',
     content: type === 'richtext' ? 'Click to edit this text block...' : '',
@@ -201,7 +201,7 @@ function FloatingToolbar({ field, onUpdate, onDelete, onDuplicate, fields }) {
             <>
               <div>
                 <label className="block text-xs text-raven-500 mb-1 font-medium">Accepted File Types</label>
-                <input type="text" value={field.accept || 'image/*,.pdf,.doc,.docx'} onChange={e => onUpdate({ ...field, accept: e.target.value })}
+                <input type="text" value={field.accept || 'image/png,image/jpeg,image/jpg'} onChange={e => onUpdate({ ...field, accept: e.target.value })}
                   className="w-full px-3 py-2 bg-white border border-raven-200 rounded-lg text-sm text-raven-50 font-mono" />
               </div>
               <div>
@@ -289,6 +289,7 @@ function ImageUploadBlock({ field, onUpdate, type }) {
       const url = await uploadFile(file, 'builder')
       onUpdate({ ...field, imageUrl: url })
     } catch (err) {
+      alert('Upload failed: ' + (err.message || 'Check Supabase storage policies'))
       console.error('Upload failed:', err)
     } finally {
       setUploading(false)
@@ -324,10 +325,10 @@ function ImageUploadBlock({ field, onUpdate, type }) {
         <>
           {isBanner ? <Image className="w-8 h-8 text-raven-300 mb-2" /> : <UserCircle className="w-8 h-8 text-raven-300 mb-2" />}
           <p className="text-sm text-raven-500">{isBanner ? 'Upload banner image' : 'Upload avatar image'}</p>
-          <p className="text-xs text-raven-500/50 mt-0.5">Click to browse</p>
+          <p className="text-xs text-raven-500/50 mt-0.5">PNG or JPEG only</p>
         </>
       )}
-      <input ref={inputRef} type="file" accept="image/*" className="sr-only" onChange={handleFile} />
+      <input ref={inputRef} type="file" accept="image/png,image/jpeg,image/jpg" className="sr-only" onChange={handleFile} />
     </label>
   )
 }
@@ -402,8 +403,8 @@ function SortableFormField({ field, isSelected, onSelect, onUpdate, onDelete, on
             ) : field.type === 'file' ? (
               <div className="border-2 border-dashed border-raven-200 rounded-lg p-6 text-center">
                 <Upload className="w-6 h-6 text-raven-300 mx-auto mb-2" />
-                <p className="text-sm text-raven-500">Click or drag to upload</p>
-                <p className="text-xs text-raven-500/50 mt-1">Max {field.maxSizeMB || 10}MB</p>
+                <p className="text-sm text-raven-500">Upload an image</p>
+                <p className="text-xs text-raven-500/50 mt-1">PNG or JPEG — Max {field.maxSizeMB || 10}MB</p>
               </div>
             ) : (
               <input type={field.type === 'email' ? 'email' : field.type === 'number' ? 'number' : field.type === 'date' ? 'date' : 'text'}
