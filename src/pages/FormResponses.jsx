@@ -3,8 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { getForm, getSubmissions, deleteSubmission, submitForm } from '../lib/supabase'
 import { useToast } from '../App'
 import {
-  ArrowLeft, Download, Upload, Trash2, Inbox, Clock,
-  ChevronLeft, ChevronRight, ExternalLink
+  ArrowLeft, Download, Upload, Plus, Trash2, Inbox, Clock,
+  ChevronLeft, ChevronRight, ExternalLink, X
 } from 'lucide-react'
 
 export default function FormResponses() {
@@ -176,6 +176,36 @@ export default function FormResponses() {
   const pageSubmissions = submissions.slice(page * perPage, (page + 1) * perPage)
   const columns = getColumns()
 
+  // Add Record
+  const [showAddRecord, setShowAddRecord] = useState(false)
+  const [newRecord, setNewRecord] = useState({})
+  const [addingRecord, setAddingRecord] = useState(false)
+
+  const inputFields = (form?.fields || []).filter(f =>
+    !['heading', 'banner_image', 'avatar_image', 'richtext', 'file'].includes(f.type)
+  )
+
+  async function handleAddRecord() {
+    if (Object.values(newRecord).every(v => !v)) return
+    setAddingRecord(true)
+    try {
+      const data = {}
+      inputFields.forEach(f => {
+        if (newRecord[f.id]) data[f.label] = newRecord[f.id]
+      })
+      await submitForm(form.id, data, { source: 'manual_add' })
+      const subs = await getSubmissions(id)
+      setSubmissions(subs)
+      setNewRecord({})
+      setShowAddRecord(false)
+      toast('Record added')
+    } catch (err) {
+      toast('Failed to add record', 'error')
+    } finally {
+      setAddingRecord(false)
+    }
+  }
+
   // Toggle selection
   function toggleSelect(subId) {
     setSelectedIds(prev => {
@@ -254,6 +284,13 @@ export default function FormResponses() {
               Delete ({selectedIds.size})
             </button>
           )}
+          <button
+            onClick={() => { setNewRecord({}); setShowAddRecord(true) }}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition-smooth border border-raven-200 text-raven-500 hover:bg-raven-900"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            Add Record
+          </button>
           <label
             className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition-smooth cursor-pointer
               border border-raven-200 text-raven-500 hover:bg-raven-900 ${importing ? 'opacity-50 pointer-events-none' : ''}`}
@@ -357,6 +394,62 @@ export default function FormResponses() {
             </div>
           )}
         </>
+      )}
+
+      {/* Add Record Modal */}
+      {showAddRecord && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4" onClick={() => setShowAddRecord(false)}>
+          <div className="bg-white border border-raven-200 rounded-2xl shadow-xl w-full max-w-md p-6 space-y-4" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between">
+              <h3 className="font-display text-lg font-semibold text-raven-50">Add Record</h3>
+              <button onClick={() => setShowAddRecord(false)} className="p-1 text-raven-500 hover:text-raven-50"><X className="w-5 h-5" /></button>
+            </div>
+            {inputFields.length > 0 ? (
+              <div className="space-y-3">
+                {inputFields.map(field => (
+                  <div key={field.id}>
+                    <label className="block text-xs text-raven-500 mb-1 font-medium">{field.label}</label>
+                    {field.type === 'textarea' ? (
+                      <textarea
+                        value={newRecord[field.id] || ''}
+                        onChange={e => setNewRecord(prev => ({ ...prev, [field.id]: e.target.value }))}
+                        rows={3}
+                        className="w-full px-3 py-2 bg-white border border-raven-200 rounded-lg text-sm text-raven-50 resize-none"
+                        placeholder={field.label}
+                      />
+                    ) : field.type === 'select' ? (
+                      <select
+                        value={newRecord[field.id] || ''}
+                        onChange={e => setNewRecord(prev => ({ ...prev, [field.id]: e.target.value }))}
+                        className="w-full px-3 py-2 bg-white border border-raven-200 rounded-lg text-sm text-raven-50"
+                      >
+                        <option value="">Select...</option>
+                        {(field.options || []).map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                      </select>
+                    ) : (
+                      <input
+                        type={field.type === 'email' ? 'email' : field.type === 'number' ? 'number' : field.type === 'phone' ? 'tel' : field.type === 'url' ? 'url' : field.type === 'date' ? 'date' : 'text'}
+                        value={newRecord[field.id] || ''}
+                        onChange={e => setNewRecord(prev => ({ ...prev, [field.id]: e.target.value }))}
+                        className="w-full px-3 py-2 bg-white border border-raven-200 rounded-lg text-sm text-raven-50"
+                        placeholder={field.label}
+                      />
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-raven-500">No input fields found on this form.</p>
+            )}
+            <button
+              onClick={handleAddRecord}
+              disabled={addingRecord || Object.values(newRecord).every(v => !v)}
+              className="w-full py-2.5 bg-raven-300 text-white font-semibold rounded-lg hover:bg-raven-400 transition-smooth text-sm disabled:opacity-50"
+            >
+              {addingRecord ? 'Adding...' : 'Add Record'}
+            </button>
+          </div>
+        </div>
       )}
     </div>
   )

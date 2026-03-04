@@ -721,6 +721,45 @@ function SettingsModal({ settings, onUpdate, onClose, formDescription, onDescrip
               <div className={`w-4 h-4 rounded-full bg-white shadow absolute top-0.5 transition-smooth ${settings.notification_enabled ? 'left-5' : 'left-0.5'}`} />
             </button>
           </div>
+
+          {/* Welcome Email */}
+          <div className="flex items-center justify-between">
+            <div><span className="text-sm text-raven-50 font-medium">Welcome Email</span><p className="text-xs text-raven-500">Send confirmation to submitter</p></div>
+            <button onClick={() => onUpdate({ ...settings, welcome_email_enabled: !settings.welcome_email_enabled })}
+              className={`w-10 h-5 rounded-full transition-smooth relative ${settings.welcome_email_enabled ? 'bg-raven-300' : 'bg-gray-300'}`}>
+              <div className={`w-4 h-4 rounded-full bg-white shadow absolute top-0.5 transition-smooth ${settings.welcome_email_enabled ? 'left-5' : 'left-0.5'}`} />
+            </button>
+          </div>
+          {settings.welcome_email_enabled && (
+            <div className="space-y-3 pl-1">
+              <div>
+                <label className="block text-xs text-raven-500 mb-1 font-medium">Email Field Label</label>
+                <input type="text" value={settings.welcome_email_field || 'Email'} onChange={e => onUpdate({ ...settings, welcome_email_field: e.target.value })}
+                  placeholder="Email"
+                  className="w-full px-3 py-2 bg-white border border-raven-200 rounded-lg text-sm text-raven-50" />
+                <p className="text-[10px] text-raven-500/60 mt-1">Must match the label of your email field exactly</p>
+              </div>
+              <div>
+                <label className="block text-xs text-raven-500 mb-1 font-medium">From Name</label>
+                <input type="text" value={settings.welcome_email_from || ''} onChange={e => onUpdate({ ...settings, welcome_email_from: e.target.value })}
+                  placeholder="Author Raven DeNoir"
+                  className="w-full px-3 py-2 bg-white border border-raven-200 rounded-lg text-sm text-raven-50" />
+              </div>
+              <div>
+                <label className="block text-xs text-raven-500 mb-1 font-medium">Subject Line</label>
+                <input type="text" value={settings.welcome_email_subject || ''} onChange={e => onUpdate({ ...settings, welcome_email_subject: e.target.value })}
+                  placeholder="Welcome to the House of DeNoir"
+                  className="w-full px-3 py-2 bg-white border border-raven-200 rounded-lg text-sm text-raven-50" />
+              </div>
+              <div>
+                <label className="block text-xs text-raven-500 mb-1.5 font-medium">Email Body</label>
+                <RichEditor
+                  value={settings.welcome_email_body || ''}
+                  onChange={val => onUpdate({ ...settings, welcome_email_body: val })}
+                  minHeight="120px" />
+              </div>
+            </div>
+          )}
         </div>
         <button onClick={onClose} className="w-full py-2.5 bg-raven-300 text-white font-semibold rounded-lg hover:bg-raven-400 transition-smooth text-sm">Done</button>
       </div>
@@ -745,6 +784,11 @@ export default function FormBuilder() {
     mailchimp_email_field: '',
     notification_enabled: true,
     submit_button_text: 'Submit',
+    welcome_email_enabled: false,
+    welcome_email_field: 'Email',
+    welcome_email_from: '',
+    welcome_email_subject: '',
+    welcome_email_body: '',
     accent_color: '#b8923e',
     background_color: '#faf7f2',
     text_color: '#2a2520',

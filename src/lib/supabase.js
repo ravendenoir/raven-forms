@@ -177,3 +177,15 @@ export async function triggerNotification(formTitle, submissionData) {
     console.warn('Notification failed:', e)
   }
 }
+
+export async function triggerWelcomeEmail(to, subject, body, fromName) {
+  try {
+    await fetch('/.netlify/functions/welcome-email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ to, subject, body, fromName })
+    })
+  } catch (e) {
+    console.warn('Welcome email failed:', e)
+  }
+}

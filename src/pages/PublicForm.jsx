@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
-import { getFormBySlug, submitForm, uploadFile, triggerMailchimp, triggerNotification } from '../lib/supabase'
+import { getFormBySlug, submitForm, uploadFile, triggerMailchimp, triggerNotification, triggerWelcomeEmail } from '../lib/supabase'
 import { Feather, Star, CheckCircle2, AlertCircle, Loader2, Upload, X } from 'lucide-react'
 
 export default function PublicForm() {
@@ -137,6 +137,20 @@ export default function PublicForm() {
       // Trigger email notification
       if (settings.notification_enabled) {
         await triggerNotification(form.title, submissionData)
+      }
+
+      // Trigger welcome email
+      if (settings.welcome_email_enabled && settings.welcome_email_subject && settings.welcome_email_body) {
+        const emailFieldLabel = settings.welcome_email_field || 'Email'
+        const recipientEmail = submissionData[emailFieldLabel]
+        if (recipientEmail) {
+          triggerWelcomeEmail(
+            recipientEmail,
+            settings.welcome_email_subject,
+            settings.welcome_email_body,
+            settings.welcome_email_from || form.title
+          )
+        }
       }
 
       // Handle thank you
