@@ -16,7 +16,7 @@ import {
   Link2, Star, Upload, ToggleLeft, List, X,
   ExternalLink, Image, UserCircle, FileText,
   Columns, Loader2, Bold, Italic, Underline,
-  ListOrdered, Quote, Palette, ALargeSmall
+  ListOrdered, Quote, Palette
 } from 'lucide-react'
 
 const FIELD_TYPES = [
@@ -226,10 +226,9 @@ function InlineLabel({ value, onChange, className, placeholder }) {
 }
 
 // ─── Inline Rich Text Editor ─────────────────────
-function InlineRichText({ value, onChange }) {
-  const [editing, setEditing] = useState(false)
+// ─── Reusable Rich Text Editor ───────────────────
+function RichEditor({ value, onChange, minHeight = '120px' }) {
   const editorRef = useRef(null)
-  const containerRef = useRef(null)
   const [showColor, setShowColor] = useState(false)
   const [showFont, setShowFont] = useState(false)
   const [showSize, setShowSize] = useState(false)
@@ -249,130 +248,134 @@ function InlineRichText({ value, onChange }) {
   const COLORS = ['#2a2520','#b8923e','#dc2626','#2563eb','#16a34a','#9333ea','#ea580c','#ffffff']
 
   useEffect(() => {
-    if (editing && editorRef.current) {
+    if (editorRef.current && !editorRef.current.dataset.init) {
       editorRef.current.innerHTML = value || ''
-      editorRef.current.focus()
+      editorRef.current.dataset.init = 'true'
     }
-  }, [editing])
-
-  useEffect(() => {
-    function outside(e) {
-      if (containerRef.current && !containerRef.current.contains(e.target)) {
-        save()
-        setEditing(false)
-      }
-    }
-    if (editing) document.addEventListener('mousedown', outside)
-    return () => document.removeEventListener('mousedown', outside)
-  }, [editing])
-
-  function save() {
-    if (editorRef.current) onChange(editorRef.current.innerHTML)
-  }
+  }, [])
 
   function exec(cmd, val) {
     document.execCommand(cmd, false, val || null)
     editorRef.current?.focus()
   }
 
+  function handleInput() {
+    if (editorRef.current) onChange(editorRef.current.innerHTML)
+  }
+
   function closeAll() { setShowColor(false); setShowFont(false); setShowSize(false) }
 
-  function TBtn({ onMouseDown: handler, active, children, title }) {
+  function TBtn({ action, children, title }) {
     return (
       <button type="button" title={title}
-        onMouseDown={e => { e.preventDefault(); handler() }}
-        className={`p-1.5 rounded transition-smooth ${active ? 'bg-raven-300 text-white' : 'text-raven-500 hover:bg-raven-900 hover:text-raven-50'}`}>
+        onMouseDown={e => { e.preventDefault(); action() }}
+        className="p-1.5 rounded transition-smooth text-raven-500 hover:bg-white hover:text-raven-50">
         {children}
       </button>
     )
   }
 
-  if (editing) {
-    return (
-      <div ref={containerRef} className="border border-raven-300 rounded-lg overflow-visible" onClick={e => e.stopPropagation()}>
-        {/* Toolbar */}
-        <div className="flex flex-wrap items-center gap-0.5 px-2 py-1.5 bg-raven-900 border-b border-raven-200 relative">
-          {/* Font picker */}
-          <div className="relative">
-            <button type="button" onMouseDown={e => { e.preventDefault(); closeAll(); setShowFont(!showFont) }}
-              className="px-2 py-1 text-[11px] text-raven-500 hover:bg-white rounded transition-smooth flex items-center gap-1">
-              <Type className="w-3.5 h-3.5" /> Font <ChevronDown className="w-2.5 h-2.5" />
-            </button>
-            {showFont && (
-              <div className="absolute top-full left-0 mt-1 w-48 bg-white border border-raven-200 rounded-lg shadow-lg z-50 py-1">
-                {FONTS.map(f => (
-                  <button key={f.val} type="button"
-                    onMouseDown={e => { e.preventDefault(); exec('fontName', f.val); setShowFont(false) }}
-                    className="block w-full text-left px-3 py-1.5 text-sm hover:bg-raven-900 transition-smooth"
-                    style={{ fontFamily: f.val }}>{f.label}</button>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Size picker */}
-          <div className="relative">
-            <button type="button" onMouseDown={e => { e.preventDefault(); closeAll(); setShowSize(!showSize) }}
-              className="px-2 py-1 text-[11px] text-raven-500 hover:bg-white rounded transition-smooth flex items-center gap-1">
-              <ALargeSmall className="w-3.5 h-3.5" /> Size <ChevronDown className="w-2.5 h-2.5" />
-            </button>
-            {showSize && (
-              <div className="absolute top-full left-0 mt-1 w-32 bg-white border border-raven-200 rounded-lg shadow-lg z-50 py-1">
-                {SIZES.map(s => (
-                  <button key={s.val} type="button"
-                    onMouseDown={e => { e.preventDefault(); exec('fontSize', s.val); setShowSize(false) }}
-                    className="block w-full text-left px-3 py-1.5 text-sm hover:bg-raven-900 transition-smooth">{s.label}</button>
-                ))}
-              </div>
-            )}
-          </div>
-
-          <div className="w-px h-5 bg-raven-200 mx-0.5" />
-
-          <TBtn onMouseDown={() => exec('bold')} title="Bold"><Bold className="w-3.5 h-3.5" /></TBtn>
-          <TBtn onMouseDown={() => exec('italic')} title="Italic"><Italic className="w-3.5 h-3.5" /></TBtn>
-          <TBtn onMouseDown={() => exec('underline')} title="Underline"><Underline className="w-3.5 h-3.5" /></TBtn>
-
-          <div className="w-px h-5 bg-raven-200 mx-0.5" />
-
-          {/* Color picker */}
-          <div className="relative">
-            <button type="button" onMouseDown={e => { e.preventDefault(); closeAll(); setShowColor(!showColor) }}
-              className="p-1.5 text-raven-500 hover:bg-raven-900 rounded transition-smooth" title="Text Color">
-              <Palette className="w-3.5 h-3.5" />
-            </button>
-            {showColor && (
-              <div className="absolute top-full left-0 mt-1 bg-white border border-raven-200 rounded-lg shadow-lg z-50 p-2 flex gap-1.5">
-                {COLORS.map(c => (
-                  <button key={c} type="button"
-                    onMouseDown={e => { e.preventDefault(); exec('foreColor', c); setShowColor(false) }}
-                    className="w-6 h-6 rounded-full border border-raven-200 hover:scale-110 transition-smooth"
-                    style={{ backgroundColor: c }} />
-                ))}
-              </div>
-            )}
-          </div>
-
-          <div className="w-px h-5 bg-raven-200 mx-0.5" />
-
-          <TBtn onMouseDown={() => exec('insertUnorderedList')} title="Bullet List"><List className="w-3.5 h-3.5" /></TBtn>
-          <TBtn onMouseDown={() => exec('insertOrderedList')} title="Numbered List"><ListOrdered className="w-3.5 h-3.5" /></TBtn>
-          <TBtn onMouseDown={() => exec('formatBlock', 'blockquote')} title="Quote"><Quote className="w-3.5 h-3.5" /></TBtn>
+  return (
+    <div className="border border-raven-200 rounded-lg overflow-visible bg-white">
+      <div className="flex flex-wrap items-center gap-0.5 px-2 py-1.5 bg-raven-900 border-b border-raven-200 relative">
+        <div className="relative">
+          <button type="button" onMouseDown={e => { e.preventDefault(); closeAll(); setShowFont(!showFont) }}
+            className="px-2 py-1 text-[11px] text-raven-500 hover:bg-white hover:text-raven-50 rounded transition-smooth flex items-center gap-1">
+            <Type className="w-3.5 h-3.5" /> Font <ChevronDown className="w-2.5 h-2.5" />
+          </button>
+          {showFont && (
+            <div className="absolute top-full left-0 mt-1 w-48 bg-white border border-raven-200 rounded-lg shadow-lg z-[60] py-1">
+              {FONTS.map(f => (
+                <button key={f.val} type="button"
+                  onMouseDown={e => { e.preventDefault(); exec('fontName', f.val); setShowFont(false) }}
+                  className="block w-full text-left px-3 py-1.5 text-sm hover:bg-raven-900 transition-smooth"
+                  style={{ fontFamily: f.val }}>{f.label}</button>
+              ))}
+            </div>
+          )}
         </div>
 
-        {/* Editable area */}
-        <div ref={editorRef} contentEditable suppressContentEditableWarning
-          className="min-h-[120px] px-4 py-3 text-sm text-raven-50 leading-relaxed focus:outline-none prose prose-sm max-w-none
-            [&_blockquote]:border-l-4 [&_blockquote]:border-raven-300 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-raven-500
-            [&_ul]:list-disc [&_ul]:ml-5 [&_ol]:list-decimal [&_ol]:ml-5"
-          onInput={save}
-          onKeyDown={e => { if (e.key === 'Tab') { e.preventDefault(); exec('insertText', '    ') } }}
-        />
+        <div className="relative">
+          <button type="button" onMouseDown={e => { e.preventDefault(); closeAll(); setShowSize(!showSize) }}
+            className="px-2 py-1 text-[11px] text-raven-500 hover:bg-white hover:text-raven-50 rounded transition-smooth flex items-center gap-1">
+            <Hash className="w-3.5 h-3.5" /> Size <ChevronDown className="w-2.5 h-2.5" />
+          </button>
+          {showSize && (
+            <div className="absolute top-full left-0 mt-1 w-32 bg-white border border-raven-200 rounded-lg shadow-lg z-[60] py-1">
+              {SIZES.map(s => (
+                <button key={s.val} type="button"
+                  onMouseDown={e => { e.preventDefault(); exec('fontSize', s.val); setShowSize(false) }}
+                  className="block w-full text-left px-3 py-1.5 text-sm hover:bg-raven-900 transition-smooth">{s.label}</button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="w-px h-5 bg-raven-200 mx-0.5" />
+
+        <TBtn action={() => exec('bold')} title="Bold"><Bold className="w-3.5 h-3.5" /></TBtn>
+        <TBtn action={() => exec('italic')} title="Italic"><Italic className="w-3.5 h-3.5" /></TBtn>
+        <TBtn action={() => exec('underline')} title="Underline"><Underline className="w-3.5 h-3.5" /></TBtn>
+
+        <div className="w-px h-5 bg-raven-200 mx-0.5" />
+
+        <div className="relative">
+          <button type="button" onMouseDown={e => { e.preventDefault(); closeAll(); setShowColor(!showColor) }}
+            className="p-1.5 text-raven-500 hover:bg-white hover:text-raven-50 rounded transition-smooth" title="Text Color">
+            <Palette className="w-3.5 h-3.5" />
+          </button>
+          {showColor && (
+            <div className="absolute top-full left-0 mt-1 bg-white border border-raven-200 rounded-lg shadow-lg z-[60] p-2 flex gap-1.5">
+              {COLORS.map(c => (
+                <button key={c} type="button"
+                  onMouseDown={e => { e.preventDefault(); exec('foreColor', c); setShowColor(false) }}
+                  className="w-6 h-6 rounded-full border border-raven-200 hover:scale-110 transition-smooth"
+                  style={{ backgroundColor: c }} />
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="w-px h-5 bg-raven-200 mx-0.5" />
+
+        <TBtn action={() => exec('insertUnorderedList')} title="Bullet List"><List className="w-3.5 h-3.5" /></TBtn>
+        <TBtn action={() => exec('insertOrderedList')} title="Numbered List"><ListOrdered className="w-3.5 h-3.5" /></TBtn>
+        <TBtn action={() => exec('formatBlock', 'blockquote')} title="Quote"><Quote className="w-3.5 h-3.5" /></TBtn>
+      </div>
+
+      <div ref={editorRef} contentEditable suppressContentEditableWarning
+        className="px-4 py-3 text-sm text-raven-50 leading-relaxed focus:outline-none prose prose-sm max-w-none
+          [&_blockquote]:border-l-4 [&_blockquote]:border-raven-300 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-raven-500
+          [&_ul]:list-disc [&_ul]:ml-5 [&_ol]:list-decimal [&_ol]:ml-5"
+        style={{ minHeight }}
+        onInput={handleInput}
+        onKeyDown={e => { if (e.key === 'Tab') { e.preventDefault(); exec('insertText', '    ') } }}
+      />
+    </div>
+  )
+}
+
+// ─── InlineRichText (click-to-edit wrapper) ──────
+function InlineRichText({ value, onChange }) {
+  const [editing, setEditing] = useState(false)
+  const containerRef = useRef(null)
+
+  useEffect(() => {
+    function outside(e) {
+      if (containerRef.current && !containerRef.current.contains(e.target)) setEditing(false)
+    }
+    if (editing) document.addEventListener('mousedown', outside)
+    return () => document.removeEventListener('mousedown', outside)
+  }, [editing])
+
+  if (editing) {
+    return (
+      <div ref={containerRef} onClick={e => e.stopPropagation()}>
+        <RichEditor value={value} onChange={onChange} />
       </div>
     )
   }
 
-  // Preview mode
   return (
     <div onClick={e => { e.stopPropagation(); setEditing(true) }}
       className="cursor-text text-sm text-raven-700 leading-relaxed hover:bg-raven-300/5 rounded-lg p-2 -m-2 transition-smooth prose prose-sm max-w-none
@@ -618,9 +621,11 @@ function SettingsModal({ settings, onUpdate, onClose, formDescription, onDescrip
             className="w-full px-3 py-2 bg-white border border-raven-200 rounded-lg text-sm text-raven-50" />
         </div>
         <div>
-          <label className="block text-xs text-raven-500 mb-1.5 font-medium">Thank You Message</label>
-          <textarea value={settings.thank_you_message || ''} onChange={e => onUpdate({ ...settings, thank_you_message: e.target.value })} rows={2}
-            className="w-full px-3 py-2 bg-white border border-raven-200 rounded-lg text-sm text-raven-50 resize-none" />
+          <label className="block text-xs text-raven-500 mb-1.5 font-medium">Thank You Page Content</label>
+          <RichEditor
+            value={settings.thank_you_message || '<h2>Thanks for submitting!</h2><p>Your response has been recorded.</p>'}
+            onChange={val => onUpdate({ ...settings, thank_you_message: val })}
+            minHeight="100px" />
         </div>
         <div>
           <label className="block text-xs text-raven-500 mb-1.5 font-medium">Redirect URL (optional)</label>

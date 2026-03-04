@@ -185,15 +185,19 @@ export default function PublicForm() {
 
   // ─── Thank You State ─────────────────────────
   if (submitted) {
+    const tyContent = form.settings?.thank_you_message || '<h2>Thanks for submitting!</h2><p>Your response has been recorded.</p>'
     return (
       <div className="min-h-screen flex items-center justify-center px-4"
         style={{ backgroundColor: bgColor }}>
-        <div className="text-center max-w-md">
+        <div className="text-center max-w-lg">
           <CheckCircle2 className="w-12 h-12 mx-auto mb-4" style={{ color: accentColor }} />
-          <h2 className="font-display text-2xl font-bold text-raven-50 mb-2">
-            {form.settings?.thank_you_message || 'Thanks for submitting!'}
-          </h2>
-          <p className="text-raven-500/80 text-sm">Your response has been recorded.</p>
+          <div className="prose prose-sm max-w-none
+            [&_blockquote]:border-l-4 [&_blockquote]:border-raven-300 [&_blockquote]:pl-4 [&_blockquote]:italic
+            [&_ul]:list-disc [&_ul]:ml-5 [&_ol]:list-decimal [&_ol]:ml-5
+            [&_h2]:font-display [&_h2]:text-2xl [&_h2]:font-bold [&_h2]:mb-2
+            [&_p]:text-sm [&_p]:leading-relaxed"
+            style={{ color: textColor }}
+            dangerouslySetInnerHTML={{ __html: tyContent }} />
         </div>
       </div>
     )
