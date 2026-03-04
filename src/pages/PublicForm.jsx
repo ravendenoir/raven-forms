@@ -229,14 +229,10 @@ export default function PublicForm() {
                   </div>
                 ) : null
               ) : field.type === 'richtext' ? (
-                <div className="text-sm leading-relaxed prose prose-sm max-w-none"
-                  dangerouslySetInnerHTML={{
-                    __html: (field.content || '').split('\n').map(line => {
-                      let p = line.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-                      if (/^[-•*]\s/.test(line)) return `<ul class="list-disc ml-5"><li>${p.replace(/^[-•*]\s/, '')}</li></ul>`
-                      return `<p>${p}</p>`
-                    }).join('')
-                  }} />
+                <div className="text-sm leading-relaxed prose prose-sm max-w-none
+                  [&_blockquote]:border-l-4 [&_blockquote]:border-raven-300 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-raven-500
+                  [&_ul]:list-disc [&_ul]:ml-5 [&_ol]:list-decimal [&_ol]:ml-5"
+                  dangerouslySetInnerHTML={{ __html: field.content || '' }} />
               ) : field.type === 'heading' ? (
                 <h3 className="font-display text-lg font-semibold pt-2" style={{ color: textColor }}>{field.label}</h3>
               ) : field.type === 'file' ? (
