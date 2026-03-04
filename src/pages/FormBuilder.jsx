@@ -13,7 +13,7 @@ import {
   GripVertical, Plus, Trash2, Copy, Settings2,
   Save, ArrowLeft, Type, AlignLeft, AlignCenter, AlignRight, ChevronDown,
   CheckSquare, Circle, Hash, Mail, Phone, Calendar,
-  Link2, Star, Upload, ToggleLeft, List, X,
+  Link2, Star, Upload, Download, ToggleLeft, List, X,
   ExternalLink, Image, UserCircle, FileText,
   Columns, Loader2, Bold, Italic, Underline,
   ListOrdered, Quote, Palette, ImagePlus
@@ -876,6 +876,47 @@ export default function FormBuilder() {
     }
   }
 
+  function exportFormJSON() {
+    const exportData = {
+      title: formTitle,
+      description: formDescription,
+      fields,
+      settings,
+    }
+    const json = JSON.stringify(exportData, null, 2)
+    const blob = new Blob([json], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const safeName = (formTitle || 'form').replace(/[^a-zA-Z0-9]/g, '-').replace(/-+/g, '-').toLowerCase()
+    const now = new Date()
+    const dateStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}_${String(now.getHours()).padStart(2,'0')}-${String(now.getMinutes()).padStart(2,'0')}`
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `${safeName}_${dateStr}.json`
+    link.click()
+    URL.revokeObjectURL(url)
+    toast('Form exported as JSON')
+  }
+
+  function importFormJSON(e) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    e.target.value = ''
+    const reader = new FileReader()
+    reader.onload = (ev) => {
+      try {
+        const data = JSON.parse(ev.target.result)
+        if (data.title) setFormTitle(data.title)
+        if (data.description !== undefined) setFormDescription(data.description)
+        if (Array.isArray(data.fields)) setFields(data.fields)
+        if (data.settings) setSettings(s => ({ ...s, ...data.settings }))
+        toast('Form imported — review and Save when ready')
+      } catch (err) {
+        toast('Invalid JSON file', 'error')
+      }
+    }
+    reader.readAsText(file)
+  }
+
   if (loading) return <div className="flex items-center justify-center py-20"><div className="w-6 h-6 border-2 border-raven-300 border-t-transparent rounded-full animate-spin" /></div>
 
   return (
@@ -886,6 +927,13 @@ export default function FormBuilder() {
           <button onClick={() => setShowSettings(true)} className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-raven-500 hover:text-raven-50 border border-raven-200 rounded-lg transition-smooth">
             <Settings2 className="w-3.5 h-3.5" /> Settings
           </button>
+          <button onClick={exportFormJSON} className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-raven-500 hover:text-raven-50 border border-raven-200 rounded-lg transition-smooth" title="Export form as JSON">
+            <Download className="w-3.5 h-3.5" /> Export
+          </button>
+          <label className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-raven-500 hover:text-raven-50 border border-raven-200 rounded-lg transition-smooth cursor-pointer" title="Import form from JSON">
+            <Upload className="w-3.5 h-3.5" /> Import
+            <input type="file" accept=".json" className="sr-only" onChange={importFormJSON} />
+          </label>
           {slug && published && (
             <button onClick={() => window.open(`/f/${slug}`, '_blank')} className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-raven-500 hover:text-raven-50 border border-raven-200 rounded-lg transition-smooth">
               <ExternalLink className="w-3.5 h-3.5" /> View Live
