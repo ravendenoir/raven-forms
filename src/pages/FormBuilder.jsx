@@ -630,7 +630,7 @@ function SortableFormField({ field, isSelected, onSelect, onUpdate, onDelete, on
 function SettingsModal({ settings, onUpdate, onClose, formDescription, onDescriptionChange }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-sm" onClick={onClose}>
-      <div className="bg-white border border-raven-200 rounded-2xl shadow-xl w-full max-w-md p-6 space-y-4 max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+      <div className="bg-white border border-raven-200 rounded-2xl shadow-xl w-full max-w-xl p-6 space-y-4 max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between">
           <h3 className="font-display text-lg font-semibold text-raven-50">Form Settings</h3>
           <button onClick={onClose} className="p-1 text-raven-500 hover:text-raven-50"><X className="w-5 h-5" /></button>
