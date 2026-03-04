@@ -68,7 +68,7 @@ export default function PublicForm() {
   function validate() {
     const newErrors = {}
     ;(form.fields || []).forEach(field => {
-      if (field.required && !['heading', 'banner_image', 'avatar_image', 'richtext', 'file'].includes(field.type)) {
+      if (field.required && !['heading', 'banner_image', 'avatar_image', 'richtext', 'file', 'divider'].includes(field.type)) {
         const val = values[field.id]
         if (field.type === 'checkbox' && (!val || val.length === 0)) {
           newErrors[field.id] = 'Please select at least one option'
@@ -135,7 +135,7 @@ export default function PublicForm() {
       // Build submission data with field labels
       const submissionData = {}
       ;(form.fields || []).forEach(field => {
-        if (!['heading', 'banner_image', 'avatar_image', 'richtext', 'file'].includes(field.type)) {
+        if (!['heading', 'banner_image', 'avatar_image', 'richtext', 'file', 'divider'].includes(field.type)) {
           if (field.type === 'file' && fileUrls[field.id]) {
             submissionData[field.label] = fileUrls[field.id]
           } else {
@@ -255,14 +255,17 @@ export default function PublicForm() {
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="public-form space-y-5" style={{ color: textColor }}>
+        <form onSubmit={handleSubmit} className="public-form flex flex-wrap gap-x-4 gap-y-5" style={{ color: textColor }}>
           {/* Honeypot - invisible to humans, catches bots */}
           <div style={{ position: 'absolute', left: '-9999px', opacity: 0, height: 0, overflow: 'hidden' }} aria-hidden="true" tabIndex={-1}>
             <label>Leave this empty</label>
             <input type="text" name="website_url" value={honeypot} onChange={e => setHoneypot(e.target.value)} autoComplete="off" />
           </div>
-          {(form.fields || []).map(field => (
-            <div key={field.id}>
+          {(form.fields || []).map(field => {
+            const fw = field.width || 'full'
+            const widthStyle = fw === 'half' ? 'calc(50% - 8px)' : fw === 'third' ? 'calc(33.33% - 8px)' : fw === 'quarter' ? 'calc(25% - 8px)' : fw === 'two-thirds' ? 'calc(66.66% - 8px)' : '100%'
+            return (
+            <div key={field.id} style={{ width: widthStyle }} className="inline-block align-top">
               {/* Banner Image */}
               {field.type === 'banner_image' ? (
                 field.imageUrl ? (
@@ -414,18 +417,80 @@ export default function PublicForm() {
                     </button>
                   )}
 
+                  {/* Slider */}
+                  {field.type === 'slider' && (
+                    <div className="space-y-2">
+                      <input
+                        type="range"
+                        min={field.min ?? 0}
+                        max={field.max ?? 100}
+                        step={field.step ?? 1}
+                        value={values[field.id] || Math.round(((field.min ?? 0) + (field.max ?? 100)) / 2)}
+                        onChange={e => setValue(field.id, Number(e.target.value))}
+                        className="w-full accent-current"
+                        style={{ accentColor }}
+                      />
+                      <div className="flex justify-between text-xs" style={{ color: textColor, opacity: 0.5 }}>
+                        <span>{field.min ?? 0}</span>
+                        <span className="font-semibold" style={{ color: accentColor }}>{values[field.id] || Math.round(((field.min ?? 0) + (field.max ?? 100)) / 2)}</span>
+                        <span>{field.max ?? 100}</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Time */}
+                  {field.type === 'time' && (
+                    <input
+                      type="time"
+                      value={values[field.id] || ''}
+                      onChange={e => setValue(field.id, e.target.value)}
+                      placeholder={field.placeholder}
+                    />
+                  )}
+
+                  {/* Likert Scale */}
+                  {field.type === 'likert' && (
+                    <div className="space-y-2">
+                      {field.likertStatement && <p className="text-sm italic" style={{ color: textColor, opacity: 0.7 }}>{field.likertStatement}</p>}
+                      <div className="flex gap-1">
+                        {(field.options || []).map(o => (
+                          <label key={o} className="flex-1 text-center cursor-pointer group">
+                            <div className={`w-6 h-6 rounded-full border-2 mx-auto mb-1 flex items-center justify-center transition-smooth ${
+                              values[field.id] === o ? 'border-transparent' : 'border-raven-200 group-hover:border-raven-300'
+                            }`} style={values[field.id] === o ? { borderColor: accentColor, backgroundColor: accentColor } : {}}>
+                              {values[field.id] === o && (
+                                <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                </svg>
+                              )}
+                            </div>
+                            <span className="text-[10px] leading-tight block" style={{ color: textColor, opacity: 0.6 }}>{o}</span>
+                            <input type="radio" className="sr-only" name={field.id} value={o}
+                              checked={values[field.id] === o}
+                              onChange={() => setValue(field.id, o)} />
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
                   {/* Error */}
                   {errors[field.id] && (
                     <p className="text-xs text-red-400 mt-1.5">{errors[field.id]}</p>
                   )}
                 </div>
               )}
+              {/* Divider */}
+              {field.type === 'divider' && (
+                <hr className="border-t my-2" style={{ borderColor: textColor, opacity: 0.2 }} />
+              )}
             </div>
-          ))}
+            )
+          })}
 
           {/* Submit Error */}
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-600 text-sm px-4 py-3 rounded-lg">
+            <div className="w-full bg-red-50 border border-red-200 text-red-600 text-sm px-4 py-3 rounded-lg">
               {error}
             </div>
           )}

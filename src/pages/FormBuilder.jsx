@@ -16,7 +16,8 @@ import {
   Link2, Star, Upload, Download, ToggleLeft, List, X,
   ExternalLink, Image, UserCircle, FileText, Code2,
   Columns, Loader2, Bold, Italic, Underline,
-  ListOrdered, Quote, Palette, ImagePlus
+  ListOrdered, Quote, Palette, ImagePlus,
+  SlidersHorizontal, Clock, Minus, BarChart3
 } from 'lucide-react'
 
 const FIELD_TYPES = [
@@ -36,6 +37,10 @@ const FIELD_TYPES = [
   { type: 'checkbox', label: 'Checkboxes', icon: CheckSquare, category: 'input' },
   { type: 'rating', label: 'Rating', icon: Star, category: 'input' },
   { type: 'toggle', label: 'Yes / No', icon: ToggleLeft, category: 'input' },
+  { type: 'slider', label: 'Slider', icon: SlidersHorizontal, category: 'input' },
+  { type: 'time', label: 'Time', icon: Clock, category: 'input' },
+  { type: 'likert', label: 'Likert Scale', icon: BarChart3, category: 'input' },
+  { type: 'divider', label: 'Divider', icon: Minus, category: 'content' },
   { type: 'file', label: 'Image', icon: Upload, category: 'content' },
 ]
 
@@ -47,15 +52,22 @@ function createField(type) {
     label: ft?.label || 'Field',
     placeholder: '',
     required: false,
-    options: ['select', 'radio', 'checkbox'].includes(type) ? ['Option 1', 'Option 2'] : [],
+    options: ['select', 'radio', 'checkbox'].includes(type) ? ['Option 1', 'Option 2']
+      : type === 'likert' ? ['Strongly Disagree', 'Disagree', 'Neutral', 'Agree', 'Strongly Agree'] : [],
     description: '',
     accept: '',
     maxSizeMB: 0,
-    width: type === 'banner_image' ? 'full' : type === 'avatar_image' ? 'full' : 'full',
+    width: type === 'banner_image' ? 'full' : type === 'avatar_image' ? 'full' : type === 'divider' ? 'full' : 'full',
     content: type === 'richtext' ? 'Click to edit this text block...' : '',
     imageUrl: '',
     imageWidthPx: 0,
     imagePositionY: 50,
+    // Slider defaults
+    min: type === 'slider' ? 0 : undefined,
+    max: type === 'slider' ? 100 : undefined,
+    step: type === 'slider' ? 1 : undefined,
+    // Likert statement
+    likertStatement: type === 'likert' ? 'Rate your experience' : undefined,
   }
 }
 
@@ -119,8 +131,8 @@ function AddFieldButton({ onAdd, position, alwaysShow }) {
 function FloatingToolbar({ field, onUpdate, onDelete, onDuplicate, fields }) {
   const [showSettings, setShowSettings] = useState(false)
   const ref = useRef(null)
-  const hasOptions = ['select', 'radio', 'checkbox'].includes(field.type)
-  const isContent = ['heading', 'banner_image', 'avatar_image', 'richtext', 'file'].includes(field.type)
+  const hasOptions = ['select', 'radio', 'checkbox', 'likert'].includes(field.type)
+  const isContent = ['heading', 'banner_image', 'avatar_image', 'richtext', 'file', 'divider'].includes(field.type)
   const hasWidth = !['banner_image'].includes(field.type)
 
   useEffect(() => {
@@ -144,11 +156,11 @@ function FloatingToolbar({ field, onUpdate, onDelete, onDuplicate, fields }) {
       {/* Width control */}
       {hasWidth && (
         <div className="flex items-center border-l border-raven-200 ml-0.5 pl-0.5">
-          {['full', 'half', 'third'].map(w => (
+          {['full', 'two-thirds', 'half', 'third', 'quarter'].map(w => (
             <button key={w} onClick={() => onUpdate({ ...field, width: w })}
               className={`px-2 py-1.5 text-[10px] font-medium rounded-md transition-smooth ${field.width === w ? 'bg-raven-900 text-raven-300' : 'text-raven-500 hover:bg-raven-900'}`}
-              title={w === 'full' ? '100%' : w === 'half' ? '50%' : '33%'}>
-              {w === 'full' ? '1/1' : w === 'half' ? '1/2' : '1/3'}
+              title={w === 'full' ? '100%' : w === 'two-thirds' ? '66%' : w === 'half' ? '50%' : w === 'third' ? '33%' : '25%'}>
+              {w === 'full' ? '1/1' : w === 'two-thirds' ? '2/3' : w === 'half' ? '1/2' : w === 'third' ? '1/3' : '1/4'}
             </button>
           ))}
         </div>
@@ -181,7 +193,7 @@ function FloatingToolbar({ field, onUpdate, onDelete, onDuplicate, fields }) {
                 className="w-full px-3 py-2 bg-white border border-raven-200 rounded-lg text-sm text-raven-50" />
             </div>
           )}
-          {hasOptions && (
+          {hasOptions && !(field.type === 'likert') && (
             <div>
               <label className="block text-xs text-raven-500 mb-1 font-medium">Options</label>
               <div className="space-y-1.5">
@@ -197,6 +209,53 @@ function FloatingToolbar({ field, onUpdate, onDelete, onDuplicate, fields }) {
                 ))}
                 <button onClick={() => onUpdate({ ...field, options: [...(field.options || []), `Option ${(field.options?.length || 0) + 1}`] })}
                   className="text-xs text-raven-300 hover:text-raven-400 font-medium">+ Add option</button>
+              </div>
+            </div>
+          )}
+          {field.type === 'likert' && (
+            <div className="space-y-3">
+              <div>
+                <label className="block text-xs text-raven-500 mb-1 font-medium">Statement</label>
+                <input type="text" value={field.likertStatement || ''} onChange={e => onUpdate({ ...field, likertStatement: e.target.value })}
+                  className="w-full px-3 py-2 bg-white border border-raven-200 rounded-lg text-sm text-raven-50" />
+              </div>
+              <div>
+                <label className="block text-xs text-raven-500 mb-1 font-medium">Scale Labels</label>
+                <div className="space-y-1.5">
+                  {(field.options || []).map((opt, i) => (
+                    <div key={i} className="flex items-center gap-2">
+                      <input type="text" value={opt}
+                        onChange={e => { const o = [...field.options]; o[i] = e.target.value; onUpdate({ ...field, options: o }) }}
+                        className="flex-1 px-3 py-1.5 bg-white border border-raven-200 rounded text-sm text-raven-50" />
+                      <button onClick={() => onUpdate({ ...field, options: field.options.filter((_, j) => j !== i) })} className="p-1 text-raven-500 hover:text-red-500">
+                        <X className="w-3 h-3" />
+                      </button>
+                    </div>
+                  ))}
+                  <button onClick={() => onUpdate({ ...field, options: [...(field.options || []), `Level ${(field.options?.length || 0) + 1}`] })}
+                    className="text-xs text-raven-300 hover:text-raven-400 font-medium">+ Add level</button>
+                </div>
+              </div>
+            </div>
+          )}
+          {field.type === 'slider' && (
+            <div className="space-y-3">
+              <div className="grid grid-cols-3 gap-2">
+                <div>
+                  <label className="block text-xs text-raven-500 mb-1 font-medium">Min</label>
+                  <input type="number" value={field.min ?? 0} onChange={e => onUpdate({ ...field, min: Number(e.target.value) })}
+                    className="w-full px-3 py-2 bg-white border border-raven-200 rounded-lg text-sm text-raven-50" />
+                </div>
+                <div>
+                  <label className="block text-xs text-raven-500 mb-1 font-medium">Max</label>
+                  <input type="number" value={field.max ?? 100} onChange={e => onUpdate({ ...field, max: Number(e.target.value) })}
+                    className="w-full px-3 py-2 bg-white border border-raven-200 rounded-lg text-sm text-raven-50" />
+                </div>
+                <div>
+                  <label className="block text-xs text-raven-500 mb-1 font-medium">Step</label>
+                  <input type="number" value={field.step ?? 1} onChange={e => onUpdate({ ...field, step: Number(e.target.value) })}
+                    className="w-full px-3 py-2 bg-white border border-raven-200 rounded-lg text-sm text-raven-50" />
+                </div>
               </div>
             </div>
           )}
@@ -550,7 +609,7 @@ function SortableFormField({ field, isSelected, onSelect, onUpdate, onDelete, on
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: field.id })
   const style = { transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.4 : 1 }
 
-  const widthClass = field.width === 'half' ? 'w-[calc(50%-8px)]' : field.width === 'third' ? 'w-[calc(33.33%-8px)]' : 'w-full'
+  const widthClass = field.width === 'half' ? 'w-[calc(50%-8px)]' : field.width === 'third' ? 'w-[calc(33.33%-8px)]' : field.width === 'quarter' ? 'w-[calc(25%-8px)]' : field.width === 'two-thirds' ? 'w-[calc(66.66%-8px)]' : 'w-full'
 
   return (
     <div ref={setNodeRef} style={style} onClick={() => onSelect(field.id)}
@@ -575,6 +634,8 @@ function SortableFormField({ field, isSelected, onSelect, onUpdate, onDelete, on
             className="font-display text-lg font-semibold text-raven-50" placeholder="Section heading..." />
         ) : field.type === 'file' ? (
           <ImageUploadBlock field={field} onUpdate={onUpdate} type="file_upload" />
+        ) : field.type === 'divider' ? (
+          <hr className="border-t border-raven-200 my-2" />
         ) : (
           <>
             <div className="mb-2">
@@ -614,7 +675,31 @@ function SortableFormField({ field, isSelected, onSelect, onUpdate, onDelete, on
               <div className="w-11 h-6 rounded-full bg-gray-300 relative">
                 <div className="w-5 h-5 rounded-full bg-white shadow absolute top-0.5 left-0.5" />
               </div>
-            ) : (
+            ) : field.type === 'slider' ? (
+              <div className="space-y-2">
+                <input type="range" min={field.min ?? 0} max={field.max ?? 100} step={field.step ?? 1}
+                  defaultValue={Math.round(((field.min ?? 0) + (field.max ?? 100)) / 2)}
+                  className="w-full accent-raven-300 pointer-events-none" readOnly />
+                <div className="flex justify-between text-xs text-raven-500">
+                  <span>{field.min ?? 0}</span><span>{field.max ?? 100}</span>
+                </div>
+              </div>
+            ) : field.type === 'time' ? (
+              <input type="time" readOnly
+                className="w-full px-3 py-2.5 bg-raven-900 border border-raven-200 rounded-lg text-sm text-raven-500 pointer-events-none" />
+            ) : field.type === 'likert' ? (
+              <div className="space-y-2">
+                {field.likertStatement && <p className="text-sm text-raven-700 italic">{field.likertStatement}</p>}
+                <div className="flex gap-2">
+                  {(field.options || []).map(o => (
+                    <div key={o} className="flex-1 text-center">
+                      <div className="w-[18px] h-[18px] rounded-full border-2 border-raven-200 mx-auto mb-1" />
+                      <span className="text-[10px] text-raven-500 leading-tight block">{o}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : field.type === 'divider' ? null : (
               <input type={field.type === 'email' ? 'email' : field.type === 'number' ? 'number' : field.type === 'date' ? 'date' : 'text'}
                 placeholder={field.placeholder || 'Type here...'} readOnly
                 className="w-full px-3 py-2.5 bg-raven-900 border border-raven-200 rounded-lg text-sm text-raven-500 pointer-events-none" />
