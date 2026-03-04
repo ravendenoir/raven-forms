@@ -280,6 +280,7 @@ function ImageUploadBlock({ field, onUpdate, type }) {
   const inputRef = useRef(null)
   const isBanner = type === 'banner_image'
   const isAvatar = type === 'avatar_image'
+  const isFileUpload = type === 'file_upload'
 
   async function handleFile(e) {
     const file = e.target.files?.[0]
@@ -297,14 +298,34 @@ function ImageUploadBlock({ field, onUpdate, type }) {
   }
 
   if (field.imageUrl) {
+    const posY = field.imagePositionY ?? 50
+
     return (
       <div className="relative group/img">
         {isBanner ? (
-          <img src={field.imageUrl} alt="Banner" className="w-full h-48 object-cover rounded-lg" />
-        ) : (
+          <div>
+            <img src={field.imageUrl} alt="Banner" className="w-full h-48 object-cover rounded-lg"
+              style={{ objectPosition: `center ${posY}%` }} />
+            {/* Position slider */}
+            <div className="flex items-center gap-2 mt-2 opacity-0 group-hover/img:opacity-100 transition-smooth">
+              <span className="text-[10px] text-raven-500 shrink-0">Position</span>
+              <input type="range" min="0" max="100" value={posY}
+                onChange={e => onUpdate({ ...field, imagePositionY: parseInt(e.target.value) })}
+                className="flex-1 h-1 accent-raven-300 cursor-pointer" />
+            </div>
+          </div>
+        ) : isAvatar ? (
           <div className="flex items-center gap-3">
             <img src={field.imageUrl} alt="Avatar" className="w-20 h-20 rounded-full object-cover border-2 border-white shadow" />
             <span className="text-xs text-raven-500">Avatar image</span>
+          </div>
+        ) : (
+          <div className="flex items-center gap-3 bg-raven-900 border border-raven-200 rounded-lg p-3">
+            <img src={field.imageUrl} alt="Uploaded" className="w-16 h-16 object-cover rounded-lg" />
+            <div className="flex-1 min-w-0">
+              <p className="text-sm text-raven-50 truncate">Image uploaded</p>
+              <p className="text-xs text-raven-500">Click × to remove</p>
+            </div>
           </div>
         )}
         <button onClick={() => onUpdate({ ...field, imageUrl: '' })}
@@ -323,8 +344,12 @@ function ImageUploadBlock({ field, onUpdate, type }) {
         <Loader2 className="w-6 h-6 text-raven-300 animate-spin" />
       ) : (
         <>
-          {isBanner ? <Image className="w-8 h-8 text-raven-300 mb-2" /> : <UserCircle className="w-8 h-8 text-raven-300 mb-2" />}
-          <p className="text-sm text-raven-500">{isBanner ? 'Upload banner image' : 'Upload avatar image'}</p>
+          {isBanner ? <Image className="w-8 h-8 text-raven-300 mb-2" />
+            : isAvatar ? <UserCircle className="w-8 h-8 text-raven-300 mb-2" />
+            : <Upload className="w-6 h-6 text-raven-300 mb-2" />}
+          <p className="text-sm text-raven-500">
+            {isBanner ? 'Upload banner image' : isAvatar ? 'Upload avatar image' : 'Upload an image'}
+          </p>
           <p className="text-xs text-raven-500/50 mt-0.5">PNG or JPEG only</p>
         </>
       )}
@@ -401,11 +426,7 @@ function SortableFormField({ field, isSelected, onSelect, onUpdate, onDelete, on
                 <div className="w-5 h-5 rounded-full bg-white shadow absolute top-0.5 left-0.5" />
               </div>
             ) : field.type === 'file' ? (
-              <div className="border-2 border-dashed border-raven-200 rounded-lg p-6 text-center">
-                <Upload className="w-6 h-6 text-raven-300 mx-auto mb-2" />
-                <p className="text-sm text-raven-500">Upload an image</p>
-                <p className="text-xs text-raven-500/50 mt-1">PNG or JPEG — Max {field.maxSizeMB || 10}MB</p>
-              </div>
+              <ImageUploadBlock field={field} onUpdate={onUpdate} type="file_upload" />
             ) : (
               <input type={field.type === 'email' ? 'email' : field.type === 'number' ? 'number' : field.type === 'date' ? 'date' : 'text'}
                 placeholder={field.placeholder || 'Type here...'} readOnly

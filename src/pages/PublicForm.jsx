@@ -218,7 +218,8 @@ export default function PublicForm() {
               {/* Banner Image */}
               {field.type === 'banner_image' ? (
                 field.imageUrl ? (
-                  <img src={field.imageUrl} alt="Banner" className="w-full h-auto rounded-lg object-cover" style={{ maxHeight: '300px' }} />
+                  <img src={field.imageUrl} alt="Banner" className="w-full h-auto rounded-lg object-cover"
+                    style={{ maxHeight: '300px', objectPosition: `center ${field.imagePositionY ?? 50}%` }} />
                 ) : null
               ) : field.type === 'avatar_image' ? (
                 field.imageUrl ? (
