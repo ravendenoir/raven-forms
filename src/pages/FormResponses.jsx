@@ -18,6 +18,7 @@ export default function FormResponses() {
   const [page, setPage] = useState(0)
   const [selectedIds, setSelectedIds] = useState(new Set())
   const [viewTab, setViewTab] = useState('responses')
+  const [importLog, setImportLog] = useState(null)
   const perPage = 25
 
   useEffect(() => {
@@ -103,6 +104,7 @@ export default function FormResponses() {
     e.target.value = '' // reset input
 
     setImporting(true)
+    setImportLog(null)
     try {
       const text = await file.text()
       const lines = text.split('\n').map(line => {
@@ -130,9 +132,29 @@ export default function FormResponses() {
         return
       }
 
-      const headers = lines[0]
+      const headers = lines[0].map(h => h.replace(/^["']|["']$/g, '').trim())
+
+      // Find email column
+      const emailColIndex = headers.findIndex(h => h.toLowerCase() === 'email')
+
+      // Get existing emails for duplicate check
+      const existingEmails = new Set()
+      if (emailColIndex >= 0) {
+        const existingSubs = await getSubmissions(id)
+        existingSubs.forEach(sub => {
+          const d = sub.data || {}
+          Object.entries(d).forEach(([key, val]) => {
+            if (key.toLowerCase() === 'email' && val) {
+              existingEmails.add(val.toLowerCase().trim())
+            }
+          })
+        })
+      }
+
       let imported = 0
       let skipped = 0
+      const duplicates = []
+      const errors = []
 
       for (let i = 1; i < lines.length; i++) {
         const row = lines[i]
@@ -140,21 +162,30 @@ export default function FormResponses() {
 
         const data = {}
         headers.forEach((header, idx) => {
-          const h = header.replace(/^["']|["']$/g, '').trim()
-          if (h && h.toLowerCase() !== 'submitted at' && h.toLowerCase() !== 'submitted') {
-            data[h] = row[idx] || ''
+          if (header && header.toLowerCase() !== 'submitted at' && header.toLowerCase() !== 'submitted') {
+            data[header] = row[idx] || ''
           }
         })
 
-        if (Object.values(data).some(v => v)) {
-          try {
-            await submitForm(id, data, { source: 'csv_import' })
-            imported++
-          } catch (err) {
-            console.error('Failed to import row', i, err)
+        if (!Object.values(data).some(v => v)) { skipped++; continue }
+
+        // Check for duplicate email
+        if (emailColIndex >= 0) {
+          const email = (row[emailColIndex] || '').toLowerCase().trim()
+          if (email && existingEmails.has(email)) {
+            duplicates.push({ row: i + 1, email: row[emailColIndex], name: data['Name'] || data['name'] || data['Full Name'] || '' })
             skipped++
+            continue
           }
-        } else {
+          if (email) existingEmails.add(email)
+        }
+
+        try {
+          await submitForm(id, data, { source: 'csv_import' })
+          imported++
+        } catch (err) {
+          console.error('Failed to import row', i, err)
+          errors.push({ row: i + 1, error: err.message })
           skipped++
         }
       }
@@ -163,7 +194,10 @@ export default function FormResponses() {
       const subs = await getSubmissions(id)
       setSubmissions(subs)
 
-      toast(`Imported ${imported} records${skipped > 0 ? ` (${skipped} skipped)` : ''}`)
+      // Build import log
+      setImportLog({ imported, skipped, duplicates, errors, timestamp: new Date().toISOString() })
+
+      toast(`Imported ${imported} records${skipped > 0 ? ` (${skipped} skipped${duplicates.length > 0 ? `, ${duplicates.length} duplicate${duplicates.length !== 1 ? 's' : ''}` : ''})` : ''}`)
     } catch (err) {
       console.error('Import error:', err)
       toast('Failed to import CSV: ' + (err.message || 'Unknown error'), 'error')
@@ -316,6 +350,47 @@ export default function FormResponses() {
           </button>
         </div>
       </div>
+
+      {/* Import Log */}
+      {importLog && (
+        <div className="mb-4 bg-white border border-raven-200 rounded-xl p-4">
+          <div className="flex items-center justify-between mb-2">
+            <h4 className="text-sm font-semibold text-raven-50">Import Results</h4>
+            <button onClick={() => setImportLog(null)} className="p-1 text-raven-500 hover:text-raven-50"><X className="w-4 h-4" /></button>
+          </div>
+          <div className="flex gap-4 text-xs mb-2">
+            <span className="text-emerald-600 font-medium">{importLog.imported} imported</span>
+            {importLog.skipped > 0 && <span className="text-raven-500">{importLog.skipped} skipped</span>}
+            {importLog.duplicates.length > 0 && <span className="text-amber-600">{importLog.duplicates.length} duplicate{importLog.duplicates.length !== 1 ? 's' : ''}</span>}
+          </div>
+          {importLog.duplicates.length > 0 && (
+            <div className="mt-2">
+              <p className="text-[10px] text-raven-500 font-medium mb-1 uppercase tracking-wider">Duplicate Emails (Already Existed)</p>
+              <div className="max-h-32 overflow-y-auto space-y-1">
+                {importLog.duplicates.map((d, i) => (
+                  <div key={i} className="flex items-center gap-2 text-xs text-raven-700 bg-amber-50 px-3 py-1.5 rounded">
+                    <span className="text-amber-500 font-medium">Row {d.row}</span>
+                    <span className="text-raven-50 font-medium">{d.email}</span>
+                    {d.name && <span className="text-raven-500">({d.name})</span>}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          {importLog.errors.length > 0 && (
+            <div className="mt-2">
+              <p className="text-[10px] text-raven-500 font-medium mb-1 uppercase tracking-wider">Errors</p>
+              <div className="max-h-20 overflow-y-auto space-y-1">
+                {importLog.errors.map((e, i) => (
+                  <div key={i} className="text-xs text-red-500 bg-red-50 px-3 py-1.5 rounded">
+                    Row {e.row}: {e.error}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Tabs */}
       {submissions.length > 0 && (

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
-import { getFormBySlug, submitForm, uploadFile, triggerMailchimp, triggerNotification, triggerWelcomeEmail, checkDuplicateEmailByField, trackFormView, getSubmissions } from '../lib/supabase'
-import { Feather, Star, CheckCircle2, AlertCircle, Loader2, Upload, X } from 'lucide-react'
+import { getFormBySlug, submitForm, uploadFile, triggerMailchimp, triggerNotification, triggerWelcomeEmail, checkDuplicateEmailByField, trackFormView, getSubmissions, getSubmissionCount } from '../lib/supabase'
+import { Feather, Star, CheckCircle2, AlertCircle, Loader2, Upload, X, Lock } from 'lucide-react'
 
 export default function PublicForm() {
   const { slug } = useParams()
@@ -17,6 +17,11 @@ export default function PublicForm() {
   const [currentPage, setCurrentPage] = useState(0)
   const [quizResults, setQuizResults] = useState(null)
   const [pollResults, setPollResults] = useState(null)
+  const [formClosed, setFormClosed] = useState(null)
+  const [passwordRequired, setPasswordRequired] = useState(false)
+  const [passwordInput, setPasswordInput] = useState('')
+  const [passwordError, setPasswordError] = useState('')
+  const [passwordVerified, setPasswordVerified] = useState(false)
 
   useEffect(() => {
     loadForm()
@@ -28,6 +33,31 @@ export default function PublicForm() {
       setForm(data)
       // Track view
       trackFormView(data.id)
+
+      const s = data.settings || {}
+
+      // Check expiration
+      if (s.expires_at && new Date(s.expires_at) < new Date()) {
+        setFormClosed('This form has expired and is no longer accepting responses.')
+        setLoading(false)
+        return
+      }
+
+      // Check max responses
+      if (s.max_responses && s.max_responses > 0) {
+        const count = await getSubmissionCount(data.id)
+        if (count >= s.max_responses) {
+          setFormClosed('This form has reached its maximum number of responses.')
+          setLoading(false)
+          return
+        }
+      }
+
+      // Check password
+      if (s.form_password) {
+        setPasswordRequired(true)
+      }
+
       // Initialize values
       const initial = {}
       ;(data.fields || []).forEach(field => {
@@ -330,6 +360,51 @@ export default function PublicForm() {
     )
   }
 
+
+  // ─── Form Closed State ───────────────────────
+  if (formClosed) {
+    return (
+      <div className="min-h-screen flex items-center justify-center px-4"
+        style={{ backgroundColor: bgColor }}>
+        <div className="text-center">
+          <AlertCircle className="w-10 h-10 text-raven-300/60 mx-auto mb-3" />
+          <p className="text-sm" style={{ color: textColor }}>{formClosed}</p>
+        </div>
+      </div>
+    )
+  }
+
+  // ─── Password Gate ───────────────────────────
+  if (passwordRequired && !passwordVerified) {
+    return (
+      <div className="min-h-screen flex items-center justify-center px-4"
+        style={{ backgroundColor: bgColor }}>
+        <div className="w-full max-w-sm text-center">
+          <Lock className="w-10 h-10 mx-auto mb-4" style={{ color: accentColor }} />
+          <h2 className="font-display text-xl font-bold mb-1" style={{ color: textColor }}>This form is protected</h2>
+          <p className="text-sm mb-6" style={{ color: textColor, opacity: 0.5 }}>Enter the password to continue</p>
+          <input type="password" value={passwordInput} onChange={e => { setPasswordInput(e.target.value); setPasswordError('') }}
+            placeholder="Password"
+            className="w-full px-4 py-3 rounded-lg border text-sm mb-3"
+            style={{ borderColor: passwordError ? '#ef4444' : accentColor + '40', color: textColor }}
+            onKeyDown={e => {
+              if (e.key === 'Enter') {
+                if (passwordInput === form.settings?.form_password) setPasswordVerified(true)
+                else setPasswordError('Incorrect password')
+              }
+            }} />
+          {passwordError && <p className="text-xs text-red-400 mb-3">{passwordError}</p>}
+          <button onClick={() => {
+            if (passwordInput === form.settings?.form_password) setPasswordVerified(true)
+            else setPasswordError('Incorrect password')
+          }} className="w-full py-3 rounded-lg text-sm font-semibold text-raven-950 transition-smooth hover:opacity-90"
+            style={{ backgroundColor: accentColor }}>
+            Unlock
+          </button>
+        </div>
+      </div>
+    )
+  }
 
   // ─── Thank You State ─────────────────────────
   if (submitted) {

@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { getForms, deleteForm, createForm } from '../lib/supabase'
+import { getForms, deleteForm, createForm, duplicateForm } from '../lib/supabase'
 import { useToast } from '../App'
 import {
   FileText, BarChart3, ExternalLink, Pencil, Trash2,
   Clock, Eye, EyeOff, Plus, Inbox, X, Mail, MessageSquare,
-  ClipboardList, Vote, HelpCircle, ShoppingCart, UserPlus, Star
+  ClipboardList, Vote, HelpCircle, ShoppingCart, UserPlus, Star, Copy
 } from 'lucide-react'
 
 // ─── Form Templates ──────────────────────────────
@@ -134,6 +134,16 @@ export default function Dashboard() {
     }
   }
 
+  async function handleDuplicate(id) {
+    try {
+      const newForm = await duplicateForm(id)
+      navigate(`/forms/${newForm.id}/edit`)
+      toast('Form duplicated')
+    } catch (err) {
+      toast('Duplicate failed', 'error')
+    }
+  }
+
   async function handleCreateForm(template) {
     try {
       const tmpl = template || TEMPLATES[0]
@@ -239,6 +249,13 @@ export default function Dashboard() {
                     title="Edit"
                   >
                     <Pencil className="w-3.5 h-3.5" />
+                  </button>
+                  <button
+                    onClick={() => handleDuplicate(form.form_id)}
+                    className="p-1.5 text-raven-500/80 hover:text-raven-300 hover:bg-raven-800/60 rounded-md transition-smooth"
+                    title="Duplicate"
+                  >
+                    <Copy className="w-3.5 h-3.5" />
                   </button>
                   <button
                     onClick={() => handleDelete(form.form_id, form.title)}

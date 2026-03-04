@@ -804,7 +804,7 @@ function SortableFormField({ field, isSelected, onSelect, onUpdate, onDelete, on
 }
 
 // ─── Settings Modal ──────────────────────────────
-function SettingsModal({ settings, onUpdate, onClose, formDescription, onDescriptionChange }) {
+function SettingsModal({ settings, onUpdate, onClose, formDescription, onDescriptionChange, slug, onSlugChange }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-sm" onClick={onClose}>
       <div className="bg-white border border-raven-200 rounded-2xl shadow-xl w-full max-w-xl p-6 space-y-4 max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
@@ -817,6 +817,17 @@ function SettingsModal({ settings, onUpdate, onClose, formDescription, onDescrip
           <textarea value={formDescription} onChange={e => onDescriptionChange(e.target.value)} rows={2}
             className="w-full px-3 py-2 bg-white border border-raven-200 rounded-lg text-sm text-raven-50 resize-none" />
         </div>
+        {slug && (
+          <div>
+            <label className="block text-xs text-raven-500 mb-1.5 font-medium">Custom URL Slug</label>
+            <div className="flex items-center gap-0">
+              <span className="px-3 py-2 bg-raven-900 border border-r-0 border-raven-200 rounded-l-lg text-xs text-raven-500">/f/</span>
+              <input type="text" value={slug} onChange={e => onSlugChange(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/--+/g, '-'))}
+                className="flex-1 px-3 py-2 bg-white border border-raven-200 rounded-r-lg text-sm text-raven-50" />
+            </div>
+            <p className="text-[10px] text-raven-500/60 mt-1">Letters, numbers, and dashes only. Updates on save.</p>
+          </div>
+        )}
         <div>
           <label className="block text-xs text-raven-500 mb-1.5 font-medium">Submit Button Text</label>
           <input type="text" value={settings.submit_button_text || 'Submit'} onChange={e => onUpdate({ ...settings, submit_button_text: e.target.value })}
@@ -833,6 +844,29 @@ function SettingsModal({ settings, onUpdate, onClose, formDescription, onDescrip
           <label className="block text-xs text-raven-500 mb-1.5 font-medium">Redirect URL (optional)</label>
           <input type="url" value={settings.thank_you_url || ''} onChange={e => onUpdate({ ...settings, thank_you_url: e.target.value })}
             className="w-full px-3 py-2 bg-white border border-raven-200 rounded-lg text-sm text-raven-50" />
+        </div>
+
+        {/* Form Controls */}
+        <div className="border-t border-raven-200 pt-4 space-y-3">
+          <h4 className="text-xs text-raven-500 font-medium">Form Controls</h4>
+          <div>
+            <label className="block text-xs text-raven-500 mb-1 font-medium">Close form after date</label>
+            <input type="datetime-local" value={settings.expires_at || ''} onChange={e => onUpdate({ ...settings, expires_at: e.target.value })}
+              className="w-full px-3 py-2 bg-white border border-raven-200 rounded-lg text-sm text-raven-50" />
+            <p className="text-[10px] text-raven-500/60 mt-1">Leave empty for no expiration</p>
+          </div>
+          <div>
+            <label className="block text-xs text-raven-500 mb-1 font-medium">Maximum responses</label>
+            <input type="number" min={0} value={settings.max_responses || 0} onChange={e => onUpdate({ ...settings, max_responses: Number(e.target.value) })}
+              className="w-full px-3 py-2 bg-white border border-raven-200 rounded-lg text-sm text-raven-50" />
+            <p className="text-[10px] text-raven-500/60 mt-1">0 = unlimited</p>
+          </div>
+          <div>
+            <label className="block text-xs text-raven-500 mb-1 font-medium">Password protect form</label>
+            <input type="text" value={settings.form_password || ''} onChange={e => onUpdate({ ...settings, form_password: e.target.value })}
+              placeholder="Leave empty for no password"
+              className="w-full px-3 py-2 bg-white border border-raven-200 rounded-lg text-sm text-raven-50" />
+          </div>
         </div>
 
         {/* Colors */}
@@ -1053,6 +1087,9 @@ export default function FormBuilder() {
     show_poll_results: false,
     webhook_url: '',
     webhook_enabled: false,
+    expires_at: '',
+    max_responses: 0,
+    form_password: '',
   })
   const [published, setPublished] = useState(false)
   const [slug, setSlug] = useState('')
@@ -1121,7 +1158,7 @@ export default function FormBuilder() {
   async function handleSave() {
     setSaving(true)
     try {
-      const data = { title: formTitle, description: formDescription, fields, settings, published }
+      const data = { title: formTitle, description: formDescription, fields, settings, published, slug }
       if (isNew) {
         const created = await createForm(data)
         toast('Form created!')
@@ -1313,7 +1350,7 @@ export default function FormBuilder() {
       </div>
 
       {showSettings && <SettingsModal settings={settings} onUpdate={setSettings} onClose={() => setShowSettings(false)}
-        formDescription={formDescription} onDescriptionChange={setFormDescription} />}
+        formDescription={formDescription} onDescriptionChange={setFormDescription} slug={slug} onSlugChange={setSlug} />}
 
       {showEmbed && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={() => setShowEmbed(false)}>

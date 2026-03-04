@@ -230,3 +230,36 @@ export async function trackFormView(formId) {
     console.warn('View tracking failed:', e)
   }
 }
+
+// ─── Form Duplication ────────────────────────────
+
+export async function duplicateForm(formId) {
+  const original = await getForm(formId)
+  const slug = original.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/-+$/, '') + '-' + Date.now().toString(36)
+  const { data, error } = await supabase
+    .from('forms')
+    .insert({
+      title: `${original.title} (Copy)`,
+      description: original.description,
+      fields: original.fields,
+      settings: original.settings,
+      published: false,
+      slug,
+      user_id: (await supabase.auth.getUser()).data.user.id,
+    })
+    .select()
+    .single()
+  if (error) throw error
+  return data
+}
+
+// ─── Submission Count ────────────────────────────
+
+export async function getSubmissionCount(formId) {
+  const { count, error } = await supabase
+    .from('submissions')
+    .select('id', { count: 'exact', head: true })
+    .eq('form_id', formId)
+  if (error) return 0
+  return count || 0
+}
