@@ -156,7 +156,7 @@ export default function PublicForm() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center"
-        style={{ background: 'radial-gradient(ellipse at 50% 0%, #1a1a2e 0%, #08080d 70%)' }}>
+        style={{ background: 'radial-gradient(ellipse at 50% 0%, #f3efe8 0%, #faf7f2 70%)' }}>
         <Loader2 className="w-6 h-6 text-raven-300 animate-spin" />
       </div>
     )
@@ -166,10 +166,10 @@ export default function PublicForm() {
   if (error && !form) {
     return (
       <div className="min-h-screen flex items-center justify-center px-4"
-        style={{ background: 'radial-gradient(ellipse at 50% 0%, #1a1a2e 0%, #08080d 70%)' }}>
+        style={{ background: 'radial-gradient(ellipse at 50% 0%, #f3efe8 0%, #faf7f2 70%)' }}>
         <div className="text-center">
           <AlertCircle className="w-10 h-10 text-red-400/60 mx-auto mb-3" />
-          <p className="text-raven-300/60 text-sm">{error}</p>
+          <p className="text-raven-500 text-sm">{error}</p>
         </div>
       </div>
     )
@@ -181,13 +181,13 @@ export default function PublicForm() {
   if (submitted) {
     return (
       <div className="min-h-screen flex items-center justify-center px-4"
-        style={{ background: 'radial-gradient(ellipse at 50% 0%, #1a1a2e 0%, #08080d 70%)' }}>
+        style={{ background: 'radial-gradient(ellipse at 50% 0%, #f3efe8 0%, #faf7f2 70%)' }}>
         <div className="text-center max-w-md">
           <CheckCircle2 className="w-12 h-12 mx-auto mb-4" style={{ color: accentColor }} />
           <h2 className="font-display text-2xl font-bold text-raven-50 mb-2">
             {form.settings?.thank_you_message || 'Thanks for submitting!'}
           </h2>
-          <p className="text-raven-300/50 text-sm">Your response has been recorded.</p>
+          <p className="text-raven-500/80 text-sm">Your response has been recorded.</p>
         </div>
       </div>
     )
@@ -196,13 +196,13 @@ export default function PublicForm() {
   // ─── Form Render ─────────────────────────────
   return (
     <div className="min-h-screen py-8 px-4"
-      style={{ background: 'radial-gradient(ellipse at 50% 0%, #1a1a2e 0%, #08080d 70%)' }}>
+      style={{ background: 'radial-gradient(ellipse at 50% 0%, #f3efe8 0%, #faf7f2 70%)' }}>
       <div className="max-w-xl mx-auto">
         {/* Header */}
         <div className="mb-6">
           <h1 className="font-display text-2xl font-bold text-raven-50">{form.title}</h1>
           {form.description && (
-            <p className="text-raven-300/60 text-sm mt-1">{form.description}</p>
+            <p className="text-raven-500 text-sm mt-1">{form.description}</p>
           )}
         </div>
 
@@ -219,7 +219,7 @@ export default function PublicForm() {
                     {field.required && <span style={{ color: accentColor }} className="ml-1">*</span>}
                   </label>
                   {field.description && (
-                    <p className="text-xs text-raven-300/40 mb-2">{field.description}</p>
+                    <p className="text-xs text-raven-500/70 mb-2">{field.description}</p>
                   )}
 
                   {/* Text inputs */}
@@ -261,13 +261,13 @@ export default function PublicForm() {
                       {(field.options || []).map(o => (
                         <label key={o} className="flex items-center gap-3 cursor-pointer group">
                           <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-smooth ${
-                            values[field.id] === o ? 'border-transparent' : 'border-raven-800/60 group-hover:border-raven-300/30'
+                            values[field.id] === o ? 'border-transparent' : 'border-raven-200 group-hover:border-raven-300'
                           }`} style={values[field.id] === o ? { borderColor: accentColor } : {}}>
                             {values[field.id] === o && (
                               <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: accentColor }} />
                             )}
                           </div>
-                          <span className="text-sm text-raven-300/80">{o}</span>
+                          <span className="text-sm text-raven-700">{o}</span>
                           <input type="radio" className="sr-only" name={field.id} value={o}
                             checked={values[field.id] === o}
                             onChange={() => setValue(field.id, o)} />
@@ -284,7 +284,7 @@ export default function PublicForm() {
                         return (
                           <label key={o} className="flex items-center gap-3 cursor-pointer group">
                             <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-smooth ${
-                              checked ? 'border-transparent' : 'border-raven-800/60 group-hover:border-raven-300/30'
+                              checked ? 'border-transparent' : 'border-raven-200 group-hover:border-raven-300'
                             }`} style={checked ? { borderColor: accentColor, backgroundColor: accentColor } : {}}>
                               {checked && (
                                 <svg className="w-3 h-3 text-raven-950" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
@@ -292,7 +292,7 @@ export default function PublicForm() {
                                 </svg>
                               )}
                             </div>
-                            <span className="text-sm text-raven-300/80">{o}</span>
+                            <span className="text-sm text-raven-700">{o}</span>
                             <input type="checkbox" className="sr-only" checked={checked}
                               onChange={() => {
                                 const curr = values[field.id] || []
@@ -317,7 +317,7 @@ export default function PublicForm() {
                           <Star
                             className="w-7 h-7"
                             fill={n <= (values[field.id] || 0) ? accentColor : 'transparent'}
-                            stroke={n <= (values[field.id] || 0) ? accentColor : 'rgba(255,255,255,0.15)'}
+                            stroke={n <= (values[field.id] || 0) ? accentColor : 'rgba(0,0,0,0.15)'}
                           />
                         </button>
                       ))}
@@ -330,7 +330,7 @@ export default function PublicForm() {
                       type="button"
                       onClick={() => setValue(field.id, !values[field.id])}
                       className={`w-12 h-6 rounded-full transition-smooth relative`}
-                      style={{ backgroundColor: values[field.id] ? accentColor : 'rgba(255,255,255,0.1)' }}
+                      style={{ backgroundColor: values[field.id] ? accentColor : '#e5ddd0' }}
                     >
                       <div className={`w-5 h-5 rounded-full bg-white shadow absolute top-0.5 transition-smooth ${
                         values[field.id] ? 'left-6' : 'left-0.5'
@@ -342,23 +342,23 @@ export default function PublicForm() {
                   {field.type === 'file' && (
                     <div>
                       {fileData[field.id] ? (
-                        <div className="border border-raven-800/40 rounded-lg p-3 flex items-center gap-3">
+                        <div className="border border-raven-200 rounded-lg p-3 flex items-center gap-3">
                           {fileData[field.id].preview && (
                             <img src={fileData[field.id].preview} alt="Preview" className="w-12 h-12 object-cover rounded" />
                           )}
                           <div className="flex-1 min-w-0">
                             <p className="text-sm text-raven-50 truncate">{fileData[field.id].file.name}</p>
-                            <p className="text-xs text-raven-300/40">{(fileData[field.id].file.size / 1024 / 1024).toFixed(1)} MB</p>
+                            <p className="text-xs text-raven-500/70">{(fileData[field.id].file.size / 1024 / 1024).toFixed(1)} MB</p>
                           </div>
-                          <button type="button" onClick={() => removeFile(field.id)} className="p-1 text-raven-300/40 hover:text-red-400 transition-smooth">
+                          <button type="button" onClick={() => removeFile(field.id)} className="p-1 text-raven-500/70 hover:text-red-400 transition-smooth">
                             <X className="w-4 h-4" />
                           </button>
                         </div>
                       ) : (
-                        <label className="block border-2 border-dashed border-raven-800/40 rounded-lg p-6 text-center cursor-pointer hover:border-raven-300/30 transition-smooth">
+                        <label className="block border-2 border-dashed border-raven-200 rounded-lg p-6 text-center cursor-pointer hover:border-raven-300/30 transition-smooth">
                           <Upload className="w-6 h-6 mx-auto mb-2" style={{ color: accentColor }} />
-                          <p className="text-sm text-raven-300/60">Click to upload</p>
-                          <p className="text-xs text-raven-300/30 mt-1">Max {field.maxSizeMB || 10}MB</p>
+                          <p className="text-sm text-raven-500">Click to upload</p>
+                          <p className="text-xs text-raven-500/50 mt-1">Max {field.maxSizeMB || 10}MB</p>
                           <input
                             type="file"
                             className="sr-only"
@@ -381,7 +381,7 @@ export default function PublicForm() {
 
           {/* Submit Error */}
           {error && (
-            <div className="bg-red-900/20 border border-red-800/30 text-red-300 text-sm px-4 py-3 rounded-lg">
+            <div className="bg-red-50 border border-red-200 text-red-600 text-sm px-4 py-3 rounded-lg">
               {error}
             </div>
           )}
@@ -399,7 +399,7 @@ export default function PublicForm() {
 
         {/* Footer */}
         <div className="text-center mt-8">
-          <span className="text-xs text-raven-300/20 flex items-center justify-center gap-1">
+          <span className="text-xs text-raven-500/30 flex items-center justify-center gap-1">
             <Feather className="w-3 h-3" /> RavenForms
           </span>
         </div>

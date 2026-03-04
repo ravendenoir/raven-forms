@@ -3,14 +3,14 @@
 @tailwind utilities;
 
 :root {
-  --raven-gold: #c9a55c;
+  --raven-gold: #b8923e;
   --raven-gold-dim: #a07d2f;
-  --raven-bg: #08080d;
-  --raven-surface: #0d0d14;
-  --raven-card: #13131b;
-  --raven-border: #1f1f2e;
-  --raven-text: #e8e4dc;
-  --raven-muted: #7a7a8a;
+  --raven-bg: #faf7f2;
+  --raven-surface: #f3efe8;
+  --raven-card: #ffffff;
+  --raven-border: #e5ddd0;
+  --raven-text: #2a2520;
+  --raven-muted: #8a8078;
 }
 
 * {
@@ -37,7 +37,7 @@ body {
 input:focus, textarea:focus, select:focus {
   outline: none;
   border-color: var(--raven-gold) !important;
-  box-shadow: 0 0 0 2px rgba(201, 165, 92, 0.15);
+  box-shadow: 0 0 0 2px rgba(184, 146, 62, 0.15);
 }
 
 /* Drag ghost */
@@ -57,8 +57,8 @@ input:focus, textarea:focus, select:focus {
 .public-form select {
   width: 100%;
   padding: 0.75rem 1rem;
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.1);
+  background: #ffffff;
+  border: 1px solid var(--raven-border);
   border-radius: 8px;
   color: var(--raven-text);
   font-family: 'DM Sans', system-ui, sans-serif;

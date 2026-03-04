@@ -73,15 +73,15 @@ export default function Dashboard() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="font-display text-2xl font-bold text-raven-50">Your Forms</h1>
-          <p className="text-raven-300/50 text-sm mt-0.5">{forms.length} form{forms.length !== 1 ? 's' : ''}</p>
+          <p className="text-raven-500/80 text-sm mt-0.5">{forms.length} form{forms.length !== 1 ? 's' : ''}</p>
         </div>
       </div>
 
       {/* Empty State */}
       {forms.length === 0 && (
-        <div className="text-center py-20 border border-dashed border-raven-800/50 rounded-xl">
-          <Inbox className="w-10 h-10 text-raven-300/30 mx-auto mb-3" />
-          <p className="text-raven-300/50 text-sm mb-4">No forms yet.</p>
+        <div className="text-center py-20 border border-dashed border-raven-200 rounded-xl">
+          <Inbox className="w-10 h-10 text-raven-500/50 mx-auto mb-3" />
+          <p className="text-raven-500/80 text-sm mb-4">No forms yet.</p>
           <button
             onClick={handleCreateForm}
             className="inline-flex items-center gap-2 px-4 py-2 bg-raven-300 text-raven-950 text-sm font-semibold rounded-lg hover:bg-raven-200 transition-smooth"
@@ -108,11 +108,11 @@ export default function Dashboard() {
                   </h3>
                   <div className="flex items-center gap-2 mt-1.5">
                     {form.published ? (
-                      <span className="inline-flex items-center gap-1 text-xs text-emerald-400/80">
+                      <span className="inline-flex items-center gap-1 text-xs text-emerald-600">
                         <Eye className="w-3 h-3" /> Published
                       </span>
                     ) : (
-                      <span className="inline-flex items-center gap-1 text-xs text-raven-300/40">
+                      <span className="inline-flex items-center gap-1 text-xs text-raven-500/70">
                         <EyeOff className="w-3 h-3" /> Draft
                       </span>
                     )}
@@ -121,14 +121,14 @@ export default function Dashboard() {
                 <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-smooth">
                   <button
                     onClick={() => navigate(`/forms/${form.form_id}/edit`)}
-                    className="p-1.5 text-raven-300/50 hover:text-raven-300 hover:bg-raven-800/60 rounded-md transition-smooth"
+                    className="p-1.5 text-raven-500/80 hover:text-raven-300 hover:bg-raven-800/60 rounded-md transition-smooth"
                     title="Edit"
                   >
                     <Pencil className="w-3.5 h-3.5" />
                   </button>
                   <button
                     onClick={() => handleDelete(form.form_id, form.title)}
-                    className="p-1.5 text-raven-300/50 hover:text-red-400 hover:bg-red-900/20 rounded-md transition-smooth"
+                    className="p-1.5 text-raven-500/80 hover:text-red-500 hover:bg-red-50 rounded-md transition-smooth"
                     title="Delete"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
@@ -137,7 +137,7 @@ export default function Dashboard() {
               </div>
 
               {/* Stats Row */}
-              <div className="flex items-center gap-4 text-xs text-raven-300/50">
+              <div className="flex items-center gap-4 text-xs text-raven-500/80">
                 <span className="flex items-center gap-1">
                   <BarChart3 className="w-3 h-3" />
                   {form.submission_count || 0} response{form.submission_count !== 1 ? 's' : ''}
@@ -153,14 +153,14 @@ export default function Dashboard() {
             <div className="border-t border-raven-800/30 px-5 py-3 flex items-center justify-between">
               <button
                 onClick={() => navigate(`/forms/${form.form_id}/responses`)}
-                className="text-xs text-raven-300/60 hover:text-raven-300 font-medium transition-smooth"
+                className="text-xs text-raven-500 hover:text-raven-300 font-medium transition-smooth"
               >
                 View Responses →
               </button>
               {form.published && (
                 <button
                   onClick={() => window.open(getFormUrl(form.slug), '_blank')}
-                  className="flex items-center gap-1 text-xs text-raven-300/40 hover:text-raven-300 transition-smooth"
+                  className="flex items-center gap-1 text-xs text-raven-500/70 hover:text-raven-300 transition-smooth"
                   title="Open public link"
                 >
                   <ExternalLink className="w-3 h-3" />

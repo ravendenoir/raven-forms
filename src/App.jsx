@@ -33,10 +33,10 @@ function ToastProvider({ children }) {
         {toasts.map(t => (
           <div
             key={t.id}
-            className={`toast-enter px-4 py-3 rounded-lg text-sm font-medium shadow-lg backdrop-blur-sm
-              ${t.type === 'error' ? 'bg-red-900/90 text-red-100 border border-red-700/50' : ''}
-              ${t.type === 'success' ? 'bg-emerald-900/90 text-emerald-100 border border-emerald-700/50' : ''}
-              ${t.type === 'info' ? 'bg-raven-800/90 text-raven-100 border border-raven-700/50' : ''}
+            className={`toast-enter px-4 py-3 rounded-lg text-sm font-medium shadow-lg
+              ${t.type === 'error' ? 'bg-red-50 text-red-700 border border-red-200' : ''}
+              ${t.type === 'success' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : ''}
+              ${t.type === 'info' ? 'bg-amber-50 text-amber-700 border border-amber-200' : ''}
             `}
           >
             {t.message}
@@ -71,19 +71,19 @@ function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4"
-      style={{ background: 'radial-gradient(ellipse at 50% 0%, #1a1a2e 0%, #08080d 70%)' }}>
+      style={{ background: 'radial-gradient(ellipse at 50% 0%, #f3efe8 0%, #faf7f2 70%)' }}>
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-2 mb-3">
             <Feather className="w-8 h-8 text-raven-300" />
           </div>
           <h1 className="font-display text-3xl font-bold text-raven-50 tracking-tight">RavenForms</h1>
-          <p className="text-raven-300/60 text-sm mt-1 font-body">Your forms. Your data. Your rules.</p>
+          <p className="text-raven-500 text-sm mt-1 font-body">Your forms. Your data. Your rules.</p>
         </div>
 
         <form onSubmit={handleLogin} className="space-y-4">
           {error && (
-            <div className="bg-red-900/30 border border-red-800/50 text-red-200 text-sm px-4 py-3 rounded-lg">
+            <div className="bg-red-50 border border-red-200 text-red-600 text-sm px-4 py-3 rounded-lg">
               {error}
             </div>
           )}
@@ -94,7 +94,7 @@ function LoginPage() {
               onChange={e => setEmail(e.target.value)}
               placeholder="Email"
               required
-              className="w-full px-4 py-3 bg-raven-850 border border-raven-800/60 rounded-lg text-raven-50 placeholder:text-raven-300/40 font-body text-sm"
+              className="w-full px-4 py-3 bg-white border border-raven-200 rounded-lg text-raven-50 placeholder:text-raven-500 font-body text-sm"
             />
           </div>
           <div>
@@ -104,7 +104,7 @@ function LoginPage() {
               onChange={e => setPassword(e.target.value)}
               placeholder="Password"
               required
-              className="w-full px-4 py-3 bg-raven-850 border border-raven-800/60 rounded-lg text-raven-50 placeholder:text-raven-300/40 font-body text-sm"
+              className="w-full px-4 py-3 bg-white border border-raven-200 rounded-lg text-raven-50 placeholder:text-raven-500 font-body text-sm"
             />
           </div>
           <button
@@ -131,9 +131,9 @@ function AdminLayout({ children }) {
   }
 
   return (
-    <div className="min-h-screen" style={{ background: 'radial-gradient(ellipse at 50% 0%, #0f0f1a 0%, #08080d 60%)' }}>
+    <div className="min-h-screen" style={{ background: 'radial-gradient(ellipse at 50% 0%, #f3efe8 0%, #faf7f2 60%)' }}>
       {/* Header */}
-      <header className="border-b border-raven-800/40 backdrop-blur-sm sticky top-0 z-40">
+      <header className="border-b border-raven-200 bg-white/80 backdrop-blur-sm sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
           <button onClick={() => navigate('/dashboard')} className="flex items-center gap-2 hover:opacity-80 transition-smooth">
             <Feather className="w-5 h-5 text-raven-300" />
@@ -153,14 +153,14 @@ function AdminLayout({ children }) {
               className={`p-2 rounded-lg transition-smooth ${
                 location.pathname === '/dashboard'
                   ? 'bg-raven-800/60 text-raven-300'
-                  : 'text-raven-300/50 hover:text-raven-300 hover:bg-raven-800/30'
+                  : 'text-raven-500/80 hover:text-raven-300 hover:bg-raven-800/30'
               }`}
             >
               <LayoutGrid className="w-4 h-4" />
             </button>
             <button
               onClick={handleSignOut}
-              className="p-2 text-raven-300/50 hover:text-red-400 rounded-lg transition-smooth hover:bg-raven-800/30"
+              className="p-2 text-raven-500 hover:text-red-500 rounded-lg transition-smooth hover:bg-red-50"
             >
               <LogOut className="w-4 h-4" />
             </button>

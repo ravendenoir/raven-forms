@@ -78,31 +78,31 @@ function SortableField({ field, isSelected, onSelect, onDelete, onDuplicate }) {
           : 'border-raven-800/30 bg-raven-850 hover:border-raven-800/60'
       }`}
     >
-      <button {...attributes} {...listeners} className="text-raven-300/30 hover:text-raven-300/60 cursor-grab active:cursor-grabbing">
+      <button {...attributes} {...listeners} className="text-raven-500/50 hover:text-raven-500 cursor-grab active:cursor-grabbing">
         <GripVertical className="w-4 h-4" />
       </button>
 
-      <Icon className="w-4 h-4 text-raven-300/50 shrink-0" />
+      <Icon className="w-4 h-4 text-raven-500/80 shrink-0" />
 
       <div className="flex-1 min-w-0">
         <span className="text-sm text-raven-50 truncate block">{field.label}</span>
-        <span className="text-xs text-raven-300/40">{FIELD_TYPES.find(f => f.type === field.type)?.label}</span>
+        <span className="text-xs text-raven-500/70">{FIELD_TYPES.find(f => f.type === field.type)?.label}</span>
       </div>
 
       {field.required && (
-        <span className="text-xs text-raven-300/70 font-medium">Required</span>
+        <span className="text-xs text-raven-500 font-medium">Required</span>
       )}
 
       <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-smooth">
         <button
           onClick={e => { e.stopPropagation(); onDuplicate(field.id) }}
-          className="p-1 text-raven-300/40 hover:text-raven-300 rounded transition-smooth"
+          className="p-1 text-raven-500/70 hover:text-raven-300 rounded transition-smooth"
         >
           <Copy className="w-3.5 h-3.5" />
         </button>
         <button
           onClick={e => { e.stopPropagation(); onDelete(field.id) }}
-          className="p-1 text-raven-300/40 hover:text-red-400 rounded transition-smooth"
+          className="p-1 text-raven-500/70 hover:text-red-400 rounded transition-smooth"
         >
           <Trash2 className="w-3.5 h-3.5" />
         </button>
@@ -115,7 +115,7 @@ function SortableField({ field, isSelected, onSelect, onDelete, onDuplicate }) {
 function FieldProperties({ field, onUpdate }) {
   if (!field) {
     return (
-      <div className="h-full flex items-center justify-center text-raven-300/30 text-sm">
+      <div className="h-full flex items-center justify-center text-raven-500/50 text-sm">
         Select a field to edit its properties
       </div>
     )
@@ -127,43 +127,43 @@ function FieldProperties({ field, onUpdate }) {
   return (
     <div className="space-y-4">
       <h3 className="font-display text-sm font-semibold text-raven-50 flex items-center gap-2">
-        <Settings className="w-4 h-4 text-raven-300/50" />
+        <Settings className="w-4 h-4 text-raven-500/80" />
         Field Properties
       </h3>
 
       {/* Label */}
       <div>
-        <label className="block text-xs text-raven-300/60 mb-1.5 font-medium">Label</label>
+        <label className="block text-xs text-raven-500 mb-1.5 font-medium">Label</label>
         <input
           type="text"
           value={field.label}
           onChange={e => onUpdate({ ...field, label: e.target.value })}
-          className="w-full px-3 py-2 bg-raven-900 border border-raven-800/50 rounded-lg text-sm text-raven-50"
+          className="w-full px-3 py-2 bg-white border border-raven-200 rounded-lg text-sm text-raven-50"
         />
       </div>
 
       {/* Description */}
       <div>
-        <label className="block text-xs text-raven-300/60 mb-1.5 font-medium">Description (optional)</label>
+        <label className="block text-xs text-raven-500 mb-1.5 font-medium">Description (optional)</label>
         <input
           type="text"
           value={field.description || ''}
           onChange={e => onUpdate({ ...field, description: e.target.value })}
           placeholder="Help text below the field"
-          className="w-full px-3 py-2 bg-raven-900 border border-raven-800/50 rounded-lg text-sm text-raven-50 placeholder:text-raven-300/30"
+          className="w-full px-3 py-2 bg-white border border-raven-200 rounded-lg text-sm text-raven-50 placeholder:text-raven-500/50"
         />
       </div>
 
       {/* Placeholder */}
       {!isHeading && !hasOptions && field.type !== 'rating' && field.type !== 'toggle' && (
         <div>
-          <label className="block text-xs text-raven-300/60 mb-1.5 font-medium">Placeholder</label>
+          <label className="block text-xs text-raven-500 mb-1.5 font-medium">Placeholder</label>
           <input
             type="text"
             value={field.placeholder || ''}
             onChange={e => onUpdate({ ...field, placeholder: e.target.value })}
             placeholder="Placeholder text..."
-            className="w-full px-3 py-2 bg-raven-900 border border-raven-800/50 rounded-lg text-sm text-raven-50 placeholder:text-raven-300/30"
+            className="w-full px-3 py-2 bg-white border border-raven-200 rounded-lg text-sm text-raven-50 placeholder:text-raven-500/50"
           />
         </div>
       )}
@@ -171,7 +171,7 @@ function FieldProperties({ field, onUpdate }) {
       {/* Options for select/radio/checkbox */}
       {hasOptions && (
         <div>
-          <label className="block text-xs text-raven-300/60 mb-1.5 font-medium">Options</label>
+          <label className="block text-xs text-raven-500 mb-1.5 font-medium">Options</label>
           <div className="space-y-2">
             {(field.options || []).map((opt, i) => (
               <div key={i} className="flex items-center gap-2">
@@ -183,14 +183,14 @@ function FieldProperties({ field, onUpdate }) {
                     newOpts[i] = e.target.value
                     onUpdate({ ...field, options: newOpts })
                   }}
-                  className="flex-1 px-3 py-1.5 bg-raven-900 border border-raven-800/50 rounded text-sm text-raven-50"
+                  className="flex-1 px-3 py-1.5 bg-white border border-raven-200 rounded text-sm text-raven-50"
                 />
                 <button
                   onClick={() => {
                     const newOpts = field.options.filter((_, j) => j !== i)
                     onUpdate({ ...field, options: newOpts })
                   }}
-                  className="p-1 text-raven-300/40 hover:text-red-400 transition-smooth"
+                  className="p-1 text-raven-500/70 hover:text-red-400 transition-smooth"
                 >
                   <Trash2 className="w-3 h-3" />
                 </button>
@@ -198,7 +198,7 @@ function FieldProperties({ field, onUpdate }) {
             ))}
             <button
               onClick={() => onUpdate({ ...field, options: [...(field.options || []), `Option ${(field.options?.length || 0) + 1}`] })}
-              className="text-xs text-raven-300/60 hover:text-raven-300 transition-smooth"
+              className="text-xs text-raven-500 hover:text-raven-300 transition-smooth"
             >
               + Add option
             </button>
@@ -209,11 +209,11 @@ function FieldProperties({ field, onUpdate }) {
       {/* Required toggle */}
       {!isHeading && (
         <div className="flex items-center justify-between py-2">
-          <label className="text-xs text-raven-300/60 font-medium">Required</label>
+          <label className="text-xs text-raven-500 font-medium">Required</label>
           <button
             onClick={() => onUpdate({ ...field, required: !field.required })}
             className={`w-10 h-5 rounded-full transition-smooth relative ${
-              field.required ? 'bg-raven-300' : 'bg-raven-800/60'
+              field.required ? 'bg-raven-300' : 'bg-gray-300'
             }`}
           >
             <div className={`w-4 h-4 rounded-full bg-white shadow absolute top-0.5 transition-smooth ${
@@ -227,25 +227,25 @@ function FieldProperties({ field, onUpdate }) {
       {field.type === 'file' && (
         <>
           <div>
-            <label className="block text-xs text-raven-300/60 mb-1.5 font-medium">Accepted File Types</label>
+            <label className="block text-xs text-raven-500 mb-1.5 font-medium">Accepted File Types</label>
             <input
               type="text"
               value={field.accept || 'image/*,.pdf,.doc,.docx'}
               onChange={e => onUpdate({ ...field, accept: e.target.value })}
               placeholder="image/*,.pdf,.doc,.docx"
-              className="w-full px-3 py-2 bg-raven-900 border border-raven-800/50 rounded-lg text-sm text-raven-50 placeholder:text-raven-300/30 font-mono"
+              className="w-full px-3 py-2 bg-white border border-raven-200 rounded-lg text-sm text-raven-50 placeholder:text-raven-500/50 font-mono"
             />
-            <p className="text-xs text-raven-300/30 mt-1">e.g. image/* for images, .pdf for PDFs</p>
+            <p className="text-xs text-raven-500/50 mt-1">e.g. image/* for images, .pdf for PDFs</p>
           </div>
           <div>
-            <label className="block text-xs text-raven-300/60 mb-1.5 font-medium">Max File Size (MB)</label>
+            <label className="block text-xs text-raven-500 mb-1.5 font-medium">Max File Size (MB)</label>
             <input
               type="number"
               value={field.maxSizeMB || 10}
               onChange={e => onUpdate({ ...field, maxSizeMB: parseInt(e.target.value) || 10 })}
               min={1}
               max={50}
-              className="w-full px-3 py-2 bg-raven-900 border border-raven-800/50 rounded-lg text-sm text-raven-50"
+              className="w-full px-3 py-2 bg-white border border-raven-200 rounded-lg text-sm text-raven-50"
             />
           </div>
         </>
@@ -261,38 +261,38 @@ function FormSettings({ settings, onUpdate }) {
       <h3 className="font-display text-sm font-semibold text-raven-50">Form Settings</h3>
 
       <div>
-        <label className="block text-xs text-raven-300/60 mb-1.5 font-medium">Submit Button Text</label>
+        <label className="block text-xs text-raven-500 mb-1.5 font-medium">Submit Button Text</label>
         <input
           type="text"
           value={settings.submit_button_text || 'Submit'}
           onChange={e => onUpdate({ ...settings, submit_button_text: e.target.value })}
-          className="w-full px-3 py-2 bg-raven-900 border border-raven-800/50 rounded-lg text-sm text-raven-50"
+          className="w-full px-3 py-2 bg-white border border-raven-200 rounded-lg text-sm text-raven-50"
         />
       </div>
 
       <div>
-        <label className="block text-xs text-raven-300/60 mb-1.5 font-medium">Thank You Message</label>
+        <label className="block text-xs text-raven-500 mb-1.5 font-medium">Thank You Message</label>
         <textarea
           value={settings.thank_you_message || ''}
           onChange={e => onUpdate({ ...settings, thank_you_message: e.target.value })}
           rows={2}
-          className="w-full px-3 py-2 bg-raven-900 border border-raven-800/50 rounded-lg text-sm text-raven-50 resize-none"
+          className="w-full px-3 py-2 bg-white border border-raven-200 rounded-lg text-sm text-raven-50 resize-none"
         />
       </div>
 
       <div>
-        <label className="block text-xs text-raven-300/60 mb-1.5 font-medium">Redirect URL (optional)</label>
+        <label className="block text-xs text-raven-500 mb-1.5 font-medium">Redirect URL (optional)</label>
         <input
           type="url"
           value={settings.thank_you_url || ''}
           onChange={e => onUpdate({ ...settings, thank_you_url: e.target.value })}
           placeholder="https://..."
-          className="w-full px-3 py-2 bg-raven-900 border border-raven-800/50 rounded-lg text-sm text-raven-50 placeholder:text-raven-300/30"
+          className="w-full px-3 py-2 bg-white border border-raven-200 rounded-lg text-sm text-raven-50 placeholder:text-raven-500/50"
         />
       </div>
 
       <div>
-        <label className="block text-xs text-raven-300/60 mb-1.5 font-medium">Accent Color</label>
+        <label className="block text-xs text-raven-500 mb-1.5 font-medium">Accent Color</label>
         <div className="flex items-center gap-2">
           <input
             type="color"
@@ -300,22 +300,22 @@ function FormSettings({ settings, onUpdate }) {
             onChange={e => onUpdate({ ...settings, accent_color: e.target.value })}
             className="w-8 h-8 rounded cursor-pointer bg-transparent border-0"
           />
-          <span className="text-xs text-raven-300/50 font-mono">{settings.accent_color || '#c9a55c'}</span>
+          <span className="text-xs text-raven-500/80 font-mono">{settings.accent_color || '#c9a55c'}</span>
         </div>
       </div>
 
       <div className="border-t border-raven-800/30 pt-4">
-        <h4 className="text-xs text-raven-300/60 font-medium mb-3">Integrations</h4>
+        <h4 className="text-xs text-raven-500 font-medium mb-3">Integrations</h4>
 
         <div className="flex items-center justify-between py-2">
           <div>
             <span className="text-sm text-raven-50">Mailchimp</span>
-            <p className="text-xs text-raven-300/40">Auto-subscribe email fields</p>
+            <p className="text-xs text-raven-500/70">Auto-subscribe email fields</p>
           </div>
           <button
             onClick={() => onUpdate({ ...settings, mailchimp_enabled: !settings.mailchimp_enabled })}
             className={`w-10 h-5 rounded-full transition-smooth relative ${
-              settings.mailchimp_enabled ? 'bg-raven-300' : 'bg-raven-800/60'
+              settings.mailchimp_enabled ? 'bg-raven-300' : 'bg-gray-300'
             }`}
           >
             <div className={`w-4 h-4 rounded-full bg-white shadow absolute top-0.5 transition-smooth ${
@@ -326,13 +326,13 @@ function FormSettings({ settings, onUpdate }) {
 
         {settings.mailchimp_enabled && (
           <div className="mt-2">
-            <label className="block text-xs text-raven-300/60 mb-1.5 font-medium">Email Field ID (from your form)</label>
+            <label className="block text-xs text-raven-500 mb-1.5 font-medium">Email Field ID (from your form)</label>
             <input
               type="text"
               value={settings.mailchimp_email_field || ''}
               onChange={e => onUpdate({ ...settings, mailchimp_email_field: e.target.value })}
               placeholder="e.g. field_abc123"
-              className="w-full px-3 py-2 bg-raven-900 border border-raven-800/50 rounded-lg text-sm text-raven-50 placeholder:text-raven-300/30 font-mono"
+              className="w-full px-3 py-2 bg-white border border-raven-200 rounded-lg text-sm text-raven-50 placeholder:text-raven-500/50 font-mono"
             />
           </div>
         )}
@@ -340,12 +340,12 @@ function FormSettings({ settings, onUpdate }) {
         <div className="flex items-center justify-between py-2 mt-2">
           <div>
             <span className="text-sm text-raven-50">Email Notifications</span>
-            <p className="text-xs text-raven-300/40">Get notified on submissions</p>
+            <p className="text-xs text-raven-500/70">Get notified on submissions</p>
           </div>
           <button
             onClick={() => onUpdate({ ...settings, notification_enabled: !settings.notification_enabled })}
             className={`w-10 h-5 rounded-full transition-smooth relative ${
-              settings.notification_enabled ? 'bg-raven-300' : 'bg-raven-800/60'
+              settings.notification_enabled ? 'bg-raven-300' : 'bg-gray-300'
             }`}
           >
             <div className={`w-4 h-4 rounded-full bg-white shadow absolute top-0.5 transition-smooth ${
@@ -510,7 +510,7 @@ export default function FormBuilder() {
       {/* Toolbar */}
       <div className="flex items-center justify-between pb-4 border-b border-raven-800/30 shrink-0">
         <div className="flex items-center gap-3">
-          <button onClick={() => navigate('/dashboard')} className="p-1.5 text-raven-300/50 hover:text-raven-300 transition-smooth">
+          <button onClick={() => navigate('/dashboard')} className="p-1.5 text-raven-500/80 hover:text-raven-300 transition-smooth">
             <ArrowLeft className="w-4 h-4" />
           </button>
           <input
@@ -526,7 +526,7 @@ export default function FormBuilder() {
           {slug && (
             <button
               onClick={() => window.open(`/f/${slug}`, '_blank')}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-raven-300/60 hover:text-raven-300 border border-raven-800/40 rounded-lg transition-smooth"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-raven-500 hover:text-raven-300 border border-raven-800/40 rounded-lg transition-smooth"
             >
               <Eye className="w-3.5 h-3.5" />
               Preview
@@ -536,8 +536,8 @@ export default function FormBuilder() {
             onClick={handleTogglePublish}
             className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-smooth ${
               published
-                ? 'bg-emerald-900/30 text-emerald-300 border border-emerald-800/40 hover:bg-emerald-900/50'
-                : 'bg-raven-800/40 text-raven-300/60 border border-raven-800/40 hover:text-raven-300'
+                ? 'bg-emerald-50 text-emerald-600 border border-emerald-200 hover:bg-emerald-100'
+                : 'bg-raven-900 text-raven-500 border border-raven-200 hover:text-raven-50'
             }`}
           >
             {published ? 'Published' : 'Publish'}
@@ -558,7 +558,7 @@ export default function FormBuilder() {
         {/* LEFT: Field List */}
         <div className="w-80 shrink-0 flex flex-col overflow-hidden">
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-xs font-medium text-raven-300/60 uppercase tracking-wider">Fields</h3>
+            <h3 className="text-xs font-medium text-raven-500 uppercase tracking-wider">Fields</h3>
             <button
               onClick={() => setShowFieldPicker(!showFieldPicker)}
               className="flex items-center gap-1 text-xs text-raven-300 hover:text-raven-200 transition-smooth"
@@ -570,14 +570,14 @@ export default function FormBuilder() {
 
           {/* Field type picker dropdown */}
           {showFieldPicker && (
-            <div className="mb-3 p-2 bg-raven-850 border border-raven-800/50 rounded-lg grid grid-cols-2 gap-1 max-h-72 overflow-y-auto">
+            <div className="mb-3 p-2 bg-raven-850 border border-raven-200 rounded-lg grid grid-cols-2 gap-1 max-h-72 overflow-y-auto">
               {FIELD_TYPES.map(ft => {
                 const Icon = ft.icon
                 return (
                   <button
                     key={ft.type}
                     onClick={() => addField(ft.type)}
-                    className="flex items-center gap-2 px-2.5 py-2 text-xs text-raven-300/70 hover:text-raven-50 hover:bg-raven-800/50 rounded-md transition-smooth text-left"
+                    className="flex items-center gap-2 px-2.5 py-2 text-xs text-raven-500 hover:text-raven-50 hover:bg-raven-800/50 rounded-md transition-smooth text-left"
                   >
                     <Icon className="w-3.5 h-3.5 shrink-0" />
                     {ft.label}
@@ -590,7 +590,7 @@ export default function FormBuilder() {
           {/* Sortable field list */}
           <div className="flex-1 overflow-y-auto space-y-1.5 pr-1">
             {fields.length === 0 ? (
-              <div className="text-center py-12 text-raven-300/30 text-xs">
+              <div className="text-center py-12 text-raven-500/50 text-xs">
                 Click "+ Add" to start building your form
               </div>
             ) : (
@@ -623,7 +623,7 @@ export default function FormBuilder() {
               <div>
                 <h2 className="font-display text-xl font-bold text-raven-50">{formTitle || 'Untitled Form'}</h2>
                 {formDescription && (
-                  <p className="text-sm text-raven-300/60 mt-1">{formDescription}</p>
+                  <p className="text-sm text-raven-500 mt-1">{formDescription}</p>
                 )}
               </div>
               {fields.map(field => (
@@ -645,20 +645,20 @@ export default function FormBuilder() {
                         {field.required && <span className="text-raven-300 ml-1">*</span>}
                       </label>
                       {field.description && (
-                        <p className="text-xs text-raven-300/40 mb-2">{field.description}</p>
+                        <p className="text-xs text-raven-500/70 mb-2">{field.description}</p>
                       )}
                       {field.type === 'textarea' ? (
                         <textarea rows={3} placeholder={field.placeholder} readOnly
-                          className="w-full px-3 py-2 bg-raven-900/50 border border-raven-800/40 rounded-lg text-sm text-raven-300/30 resize-none" />
+                          className="w-full px-3 py-2 bg-raven-900 border border-raven-200 rounded-lg text-sm text-raven-500/50 resize-none" />
                       ) : field.type === 'select' ? (
-                        <select className="w-full px-3 py-2 bg-raven-900/50 border border-raven-800/40 rounded-lg text-sm text-raven-300/50">
+                        <select className="w-full px-3 py-2 bg-raven-900 border border-raven-200 rounded-lg text-sm text-raven-500/80">
                           <option>Select...</option>
                           {(field.options || []).map(o => <option key={o}>{o}</option>)}
                         </select>
                       ) : field.type === 'radio' ? (
                         <div className="space-y-1.5">
                           {(field.options || []).map(o => (
-                            <label key={o} className="flex items-center gap-2 text-sm text-raven-300/60">
+                            <label key={o} className="flex items-center gap-2 text-sm text-raven-500">
                               <div className="w-4 h-4 rounded-full border border-raven-800/50" />
                               {o}
                             </label>
@@ -667,7 +667,7 @@ export default function FormBuilder() {
                       ) : field.type === 'checkbox' ? (
                         <div className="space-y-1.5">
                           {(field.options || []).map(o => (
-                            <label key={o} className="flex items-center gap-2 text-sm text-raven-300/60">
+                            <label key={o} className="flex items-center gap-2 text-sm text-raven-500">
                               <div className="w-4 h-4 rounded border border-raven-800/50" />
                               {o}
                             </label>
@@ -680,19 +680,19 @@ export default function FormBuilder() {
                           ))}
                         </div>
                       ) : field.type === 'toggle' ? (
-                        <div className="w-10 h-5 rounded-full bg-raven-800/50 relative">
-                          <div className="w-4 h-4 rounded-full bg-raven-300/30 absolute top-0.5 left-0.5" />
+                        <div className="w-10 h-5 rounded-full bg-raven-200 relative">
+                          <div className="w-4 h-4 rounded-full bg-raven-500 absolute top-0.5 left-0.5" />
                         </div>
                       ) : field.type === 'file' ? (
-                        <div className="border-2 border-dashed border-raven-800/40 rounded-lg p-6 text-center">
-                          <Upload className="w-6 h-6 text-raven-300/30 mx-auto mb-2" />
-                          <p className="text-xs text-raven-300/40">Click or drag to upload</p>
+                        <div className="border-2 border-dashed border-raven-200 rounded-lg p-6 text-center">
+                          <Upload className="w-6 h-6 text-raven-500/50 mx-auto mb-2" />
+                          <p className="text-xs text-raven-500/70">Click or drag to upload</p>
                           <p className="text-xs text-raven-300/25 mt-1">Max {field.maxSizeMB || 10}MB</p>
                         </div>
                       ) : (
                         <input type={field.type === 'email' ? 'email' : field.type === 'number' ? 'number' : field.type === 'date' ? 'date' : 'text'}
                           placeholder={field.placeholder} readOnly
-                          className="w-full px-3 py-2 bg-raven-900/50 border border-raven-800/40 rounded-lg text-sm text-raven-300/30" />
+                          className="w-full px-3 py-2 bg-raven-900 border border-raven-200 rounded-lg text-sm text-raven-500/50" />
                       )}
                     </>
                   )}
@@ -718,7 +718,7 @@ export default function FormBuilder() {
               className={`px-3 py-1 text-xs font-medium rounded-md transition-smooth ${
                 rightPanel === 'properties'
                   ? 'bg-raven-800/60 text-raven-50'
-                  : 'text-raven-300/50 hover:text-raven-300'
+                  : 'text-raven-500/80 hover:text-raven-300'
               }`}
             >
               Properties
@@ -728,7 +728,7 @@ export default function FormBuilder() {
               className={`px-3 py-1 text-xs font-medium rounded-md transition-smooth ${
                 rightPanel === 'settings'
                   ? 'bg-raven-800/60 text-raven-50'
-                  : 'text-raven-300/50 hover:text-raven-300'
+                  : 'text-raven-500/80 hover:text-raven-300'
               }`}
             >
               Settings
@@ -744,13 +744,13 @@ export default function FormBuilder() {
           {/* Form description (in settings panel) */}
           {rightPanel === 'settings' && (
             <div className="mt-4 pt-4 border-t border-raven-800/30">
-              <label className="block text-xs text-raven-300/60 mb-1.5 font-medium">Form Description</label>
+              <label className="block text-xs text-raven-500 mb-1.5 font-medium">Form Description</label>
               <textarea
                 value={formDescription}
                 onChange={e => setFormDescription(e.target.value)}
                 rows={2}
                 placeholder="Optional subtitle for your form"
-                className="w-full px-3 py-2 bg-raven-900 border border-raven-800/50 rounded-lg text-sm text-raven-50 resize-none placeholder:text-raven-300/30"
+                className="w-full px-3 py-2 bg-white border border-raven-200 rounded-lg text-sm text-raven-50 resize-none placeholder:text-raven-500/50"
               />
             </div>
           )}
