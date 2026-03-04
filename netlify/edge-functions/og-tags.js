@@ -7,24 +7,33 @@ const CRAWLERS = /facebookexternalhit|Facebot|Twitterbot|LinkedInBot|WhatsApp|Sl
 
 export default async (request, context) => {
   const ua = request.headers.get('user-agent') || ''
+  const url = new URL(request.url)
+
+  // Debug mode: add ?og=debug to any /f/ URL to see what the crawler gets
+  const debugMode = url.searchParams.get('og') === 'debug'
 
   // Regular visitors get the normal SPA — no modification
-  if (!CRAWLERS.test(ua)) {
+  if (!CRAWLERS.test(ua) && !debugMode) {
     return context.next()
   }
 
   // Extract slug from /f/my-form-slug
-  const url = new URL(request.url)
   const slug = url.pathname.replace(/^\/f\//, '').replace(/\/$/, '')
 
-  if (!slug) return context.next()
+  if (!slug) {
+    if (debugMode) return new Response('No slug found in URL', { headers: { 'content-type': 'text/plain' } })
+    return context.next()
+  }
 
   try {
     // Fetch form data directly from Supabase REST API
     const supabaseUrl = Deno.env.get('VITE_SUPABASE_URL')
     const supabaseKey = Deno.env.get('VITE_SUPABASE_ANON_KEY')
 
-    if (!supabaseUrl || !supabaseKey) return context.next()
+    if (!supabaseUrl || !supabaseKey) {
+      if (debugMode) return new Response(`Missing env vars.\nVITE_SUPABASE_URL: ${supabaseUrl ? 'SET' : 'MISSING'}\nVITE_SUPABASE_ANON_KEY: ${supabaseKey ? 'SET' : 'MISSING'}`, { headers: { 'content-type': 'text/plain' } })
+      return context.next()
+    }
 
     const apiUrl = `${supabaseUrl}/rest/v1/forms?slug=eq.${encodeURIComponent(slug)}&published=eq.true&select=title,description,fields,settings`
 
@@ -36,10 +45,16 @@ export default async (request, context) => {
       }
     })
 
-    if (!res.ok) return context.next()
+    if (!res.ok) {
+      if (debugMode) return new Response(`Supabase API error: ${res.status} ${res.statusText}\nURL: ${apiUrl}`, { headers: { 'content-type': 'text/plain' } })
+      return context.next()
+    }
 
     const forms = await res.json()
-    if (!forms.length) return context.next()
+    if (!forms.length) {
+      if (debugMode) return new Response(`No published form found with slug: "${slug}"\nAPI URL: ${apiUrl}\nResponse: ${JSON.stringify(forms)}`, { headers: { 'content-type': 'text/plain' } })
+      return context.next()
+    }
 
     const form = forms[0]
     const title = form.title || 'Form'
@@ -67,6 +82,23 @@ export default async (request, context) => {
       .replace(/"/g, '&quot;')
       .replace(/</g, '&lt;')
       .replace(/>/g, '&gt;')
+
+    // In debug mode, show raw data instead of the OG HTML
+    if (debugMode) {
+      return new Response(
+        `=== OG EDGE FUNCTION DEBUG ===\n\n` +
+        `Slug: ${slug}\n` +
+        `Title: ${title}\n` +
+        `Description: ${description}\n` +
+        `OG Image: ${ogImage || '(none found)'}\n` +
+        `Accent Color: ${accentColor}\n` +
+        `Total Fields: ${fields.length}\n` +
+        `Banner Fields: ${fields.filter(f => f.type === 'banner_image').map(f => JSON.stringify({ type: f.type, imageUrl: f.imageUrl })).join(', ') || '(none)'}\n` +
+        `Avatar Fields: ${fields.filter(f => f.type === 'avatar_image').map(f => JSON.stringify({ type: f.type, imageUrl: f.imageUrl })).join(', ') || '(none)'}\n\n` +
+        `=== RAW FORM DATA ===\n${JSON.stringify(form, null, 2)}`,
+        { headers: { 'content-type': 'text/plain' } }
+      )
+    }
 
     const html = `<!DOCTYPE html>
 <html lang="en">
@@ -116,8 +148,14 @@ export default async (request, context) => {
   } catch (err) {
     // If anything fails, fall through to normal SPA
     console.error('OG edge function error:', err)
+    if (debugMode) {
+      return new Response(`Edge function error: ${err.message}\n\nStack: ${err.stack}`, {
+        status: 500,
+        headers: { 'content-type': 'text/plain' }
+      })
+    }
     return context.next()
   }
 }
 
-export const config = { path: "/f/*" }
+// Path configured in netlify.toml → [[edge_functions]]
