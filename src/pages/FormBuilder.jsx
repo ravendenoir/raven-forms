@@ -11,12 +11,12 @@ import {
 import { CSS } from '@dnd-kit/utilities'
 import {
   GripVertical, Plus, Trash2, Copy, Settings2,
-  Save, ArrowLeft, Type, AlignLeft, ChevronDown,
+  Save, ArrowLeft, Type, AlignLeft, AlignCenter, AlignRight, ChevronDown,
   CheckSquare, Circle, Hash, Mail, Phone, Calendar,
   Link2, Star, Upload, ToggleLeft, List, X,
   ExternalLink, Image, UserCircle, FileText,
   Columns, Loader2, Bold, Italic, Underline,
-  ListOrdered, Quote, Palette
+  ListOrdered, Quote, Palette, ImagePlus
 } from 'lucide-react'
 
 const FIELD_TYPES = [
@@ -265,6 +265,20 @@ function RichEditor({ value, onChange, minHeight = '120px' }) {
 
   function closeAll() { setShowColor(false); setShowFont(false); setShowSize(false) }
 
+  const imgInputRef = useRef(null)
+
+  async function handleImageInsert(e) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    e.target.value = ''
+    try {
+      const url = await uploadFile(file, 'richtext')
+      exec('insertHTML', `<img src="${url}" style="max-width:100%;height:auto;border-radius:8px;margin:8px 0;" />`)
+    } catch (err) {
+      alert('Image upload failed: ' + (err.message || 'Unknown error'))
+    }
+  }
+
   function TBtn({ action, children, title }) {
     return (
       <button type="button" title={title}
@@ -341,6 +355,17 @@ function RichEditor({ value, onChange, minHeight = '120px' }) {
         <TBtn action={() => exec('insertUnorderedList')} title="Bullet List"><List className="w-3.5 h-3.5" /></TBtn>
         <TBtn action={() => exec('insertOrderedList')} title="Numbered List"><ListOrdered className="w-3.5 h-3.5" /></TBtn>
         <TBtn action={() => exec('formatBlock', 'blockquote')} title="Quote"><Quote className="w-3.5 h-3.5" /></TBtn>
+
+        <div className="w-px h-5 bg-raven-200 mx-0.5" />
+
+        <TBtn action={() => exec('justifyLeft')} title="Align Left"><AlignLeft className="w-3.5 h-3.5" /></TBtn>
+        <TBtn action={() => exec('justifyCenter')} title="Align Center"><AlignCenter className="w-3.5 h-3.5" /></TBtn>
+        <TBtn action={() => exec('justifyRight')} title="Align Right"><AlignRight className="w-3.5 h-3.5" /></TBtn>
+
+        <div className="w-px h-5 bg-raven-200 mx-0.5" />
+
+        <TBtn action={() => imgInputRef.current?.click()} title="Insert Image"><ImagePlus className="w-3.5 h-3.5" /></TBtn>
+        <input ref={imgInputRef} type="file" accept="image/png,image/jpeg,image/jpg" className="sr-only" onChange={handleImageInsert} />
       </div>
 
       <div ref={editorRef} contentEditable suppressContentEditableWarning
