@@ -3,6 +3,10 @@
   publish = "dist"
   functions = "netlify/functions"
 
+[[edge_functions]]
+  function = "og-tags"
+  path = "/f/*"
+
 [[redirects]]
   from = "/f/*"
   to = "/index.html"
