@@ -878,6 +878,7 @@ function SettingsModal({ settings, onUpdate, onClose, formDescription, onDescrip
               { key: 'background_color', label: 'Background Color', fallback: '#faf7f2' },
               { key: 'text_color', label: 'Text Color', fallback: '#2a2520' },
               { key: 'card_color', label: 'Card Color', fallback: '#ffffff' },
+              { key: 'button_text_color', label: 'Button Text', fallback: '#faf7f2' },
             ].map(c => (
               <div key={c.key}>
                 <label className="block text-xs text-raven-500 mb-1 font-medium">{c.label}</label>
@@ -1080,6 +1081,7 @@ export default function FormBuilder() {
     background_color: '#faf7f2',
     text_color: '#2a2520',
     card_color: '#ffffff',
+    button_text_color: '#faf7f2',
     form_mode: 'form',
     show_score: false,
     show_correct_answers: false,

@@ -336,6 +336,7 @@ export default function PublicForm() {
   const bgColor = form?.settings?.background_color || '#faf7f2'
   const textColor = form?.settings?.text_color || '#2a2520'
   const cardColor = form?.settings?.card_color || '#ffffff'
+  const buttonTextColor = form?.settings?.button_text_color || '#faf7f2'
 
   // ─── Loading State ───────────────────────────
   if (loading) {
@@ -397,8 +398,8 @@ export default function PublicForm() {
           <button onClick={() => {
             if (passwordInput === form.settings?.form_password) setPasswordVerified(true)
             else setPasswordError('Incorrect password')
-          }} className="w-full py-3 rounded-lg text-sm font-semibold text-raven-950 transition-smooth hover:opacity-90"
-            style={{ backgroundColor: accentColor }}>
+          }} className="w-full py-3 rounded-lg text-sm font-semibold transition-smooth hover:opacity-90"
+            style={{ backgroundColor: accentColor, color: buttonTextColor }}>
             Unlock
           </button>
         </div>
@@ -631,7 +632,7 @@ export default function PublicForm() {
                               checked ? 'border-transparent' : 'border-raven-200 group-hover:border-raven-300'
                             }`} style={checked ? { borderColor: accentColor, backgroundColor: accentColor } : {}}>
                               {checked && (
-                                <svg className="w-3 h-3 text-raven-950" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke={buttonTextColor} strokeWidth={3}>
                                   <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                                 </svg>
                               )}
@@ -773,14 +774,14 @@ export default function PublicForm() {
               <button type="button" onClick={() => {
                 if (validatePage(currentPage)) { setCurrentPage(p => p + 1); setError(''); window.scrollTo({ top: 0, behavior: 'smooth' }) }
               }}
-                className="flex-1 py-3 rounded-lg text-sm font-semibold text-raven-950 transition-smooth hover:opacity-90"
-                style={{ backgroundColor: accentColor }}>
+                className="flex-1 py-3 rounded-lg text-sm font-semibold transition-smooth hover:opacity-90"
+                style={{ backgroundColor: accentColor, color: buttonTextColor }}>
                 Next
               </button>
             ) : (
               <button type="submit" disabled={submitting}
-                className="flex-1 py-3 rounded-lg text-sm font-semibold text-raven-950 transition-smooth hover:opacity-90 disabled:opacity-50"
-                style={{ backgroundColor: accentColor }}>
+                className="flex-1 py-3 rounded-lg text-sm font-semibold transition-smooth hover:opacity-90 disabled:opacity-50"
+                style={{ backgroundColor: accentColor, color: buttonTextColor }}>
                 {submitting ? 'Submitting...' : (form.settings?.submit_button_text || 'Submit')}
               </button>
             )}
