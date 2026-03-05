@@ -125,9 +125,6 @@ export default async (request, context) => {
   <!-- General -->
   <meta name="description" content="${esc(description)}" />
   <meta name="theme-color" content="${esc(accentColor)}" />
-
-  <!-- Redirect real browsers that somehow land here -->
-  <meta http-equiv="refresh" content="0;url=${esc(url.href)}" />
 </head>
 <body>
   <h1>${esc(title)}</h1>

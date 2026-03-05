@@ -17,7 +17,7 @@ import {
   ExternalLink, Image, UserCircle, FileText, Code2,
   Columns, Loader2, Bold, Italic, Underline,
   ListOrdered, Quote, Palette, ImagePlus,
-  SlidersHorizontal, Clock, Minus, BarChart3
+  SlidersHorizontal, Clock, Minus, BarChart3, Pipette
 } from 'lucide-react'
 
 const FIELD_TYPES = [
@@ -873,38 +873,37 @@ function SettingsModal({ settings, onUpdate, onClose, formDescription, onDescrip
         <div className="border-t border-raven-200 pt-4">
           <h4 className="text-xs text-raven-500 font-medium mb-3">Appearance</h4>
           <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-xs text-raven-500 mb-1 font-medium">Accent Color</label>
-              <div className="flex items-center gap-2">
-                <input type="color" value={settings.accent_color || '#b8923e'} onChange={e => onUpdate({ ...settings, accent_color: e.target.value })}
-                  className="w-8 h-8 rounded cursor-pointer bg-transparent border-0" />
-                <span className="text-xs text-raven-500 font-mono">{settings.accent_color || '#b8923e'}</span>
+            {[
+              { key: 'accent_color', label: 'Accent Color', fallback: '#b8923e' },
+              { key: 'background_color', label: 'Background Color', fallback: '#faf7f2' },
+              { key: 'text_color', label: 'Text Color', fallback: '#2a2520' },
+              { key: 'card_color', label: 'Card Color', fallback: '#ffffff' },
+            ].map(c => (
+              <div key={c.key}>
+                <label className="block text-xs text-raven-500 mb-1 font-medium">{c.label}</label>
+                <div className="flex items-center gap-1.5">
+                  <input type="color" value={settings[c.key] || c.fallback} onChange={e => onUpdate({ ...settings, [c.key]: e.target.value })}
+                    className="w-8 h-8 rounded cursor-pointer bg-transparent border-0" />
+                  {window.EyeDropper && (
+                    <button
+                      type="button"
+                      title="Pick color from screen"
+                      onClick={async () => {
+                        try {
+                          const dropper = new window.EyeDropper()
+                          const result = await dropper.open()
+                          if (result?.sRGBHex) onUpdate({ ...settings, [c.key]: result.sRGBHex })
+                        } catch (e) { /* user cancelled */ }
+                      }}
+                      className="p-1 rounded hover:bg-raven-900 text-raven-500 hover:text-raven-300 transition-smooth"
+                    >
+                      <Pipette className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                  <span className="text-xs text-raven-500 font-mono">{settings[c.key] || c.fallback}</span>
+                </div>
               </div>
-            </div>
-            <div>
-              <label className="block text-xs text-raven-500 mb-1 font-medium">Background Color</label>
-              <div className="flex items-center gap-2">
-                <input type="color" value={settings.background_color || '#faf7f2'} onChange={e => onUpdate({ ...settings, background_color: e.target.value })}
-                  className="w-8 h-8 rounded cursor-pointer bg-transparent border-0" />
-                <span className="text-xs text-raven-500 font-mono">{settings.background_color || '#faf7f2'}</span>
-              </div>
-            </div>
-            <div>
-              <label className="block text-xs text-raven-500 mb-1 font-medium">Text Color</label>
-              <div className="flex items-center gap-2">
-                <input type="color" value={settings.text_color || '#2a2520'} onChange={e => onUpdate({ ...settings, text_color: e.target.value })}
-                  className="w-8 h-8 rounded cursor-pointer bg-transparent border-0" />
-                <span className="text-xs text-raven-500 font-mono">{settings.text_color || '#2a2520'}</span>
-              </div>
-            </div>
-            <div>
-              <label className="block text-xs text-raven-500 mb-1 font-medium">Card Color</label>
-              <div className="flex items-center gap-2">
-                <input type="color" value={settings.card_color || '#ffffff'} onChange={e => onUpdate({ ...settings, card_color: e.target.value })}
-                  className="w-8 h-8 rounded cursor-pointer bg-transparent border-0" />
-                <span className="text-xs text-raven-500 font-mono">{settings.card_color || '#ffffff'}</span>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
 
