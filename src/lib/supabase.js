@@ -207,16 +207,17 @@ export async function checkDuplicateEmail(formId, email) {
 }
 
 export async function checkDuplicateEmailByField(formId, fieldLabel, email) {
-  const { data, error } = await supabase
-    .from('submissions')
-    .select('data')
-    .eq('form_id', formId)
-  if (error) return false
-  const emailLower = email.toLowerCase().trim()
-  return data.some(row => {
-    const val = row.data?.[fieldLabel]
-    return val && val.toLowerCase().trim() === emailLower
-  })
+  try {
+    const { data, error } = await supabase.rpc('check_duplicate_email', {
+      form_id_input: formId,
+      field_label_input: fieldLabel,
+      email_input: email,
+    })
+    if (error) return false
+    return data === true
+  } catch (e) {
+    return false
+  }
 }
 
 // ─── View Tracking ───────────────────────────────
