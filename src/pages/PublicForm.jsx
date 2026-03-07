@@ -237,7 +237,8 @@ export default function PublicForm() {
 
       // Trigger Mailchimp if enabled
       if (settings.mailchimp_enabled && settings.mailchimp_email_field) {
-        const emailValue = values[settings.mailchimp_email_field]
+        const mcField = (form.fields || []).find(f => f.label === settings.mailchimp_email_field)
+        const emailValue = mcField ? values[mcField.id] : submissionData[settings.mailchimp_email_field]
         if (emailValue) {
           await triggerMailchimp(emailValue, form.id)
         }
