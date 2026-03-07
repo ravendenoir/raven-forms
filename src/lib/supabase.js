@@ -74,13 +74,11 @@ export async function deleteForm(id) {
 // ─── Submission Operations ───────────────────────
 
 export async function submitForm(formId, data, metadata = {}) {
-  const { data: submission, error } = await supabase
+  const { error } = await supabase
     .from('submissions')
     .insert({ form_id: formId, data, metadata })
-    .select()
-    .single()
   if (error) throw error
-  return submission
+  return true
 }
 
 export async function getSubmissions(formId) {
