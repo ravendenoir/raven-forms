@@ -420,8 +420,10 @@ export default function PublicForm() {
               [&_blockquote]:border-l-4 [&_blockquote]:border-raven-300 [&_blockquote]:pl-4 [&_blockquote]:italic
               [&_ul]:list-disc [&_ul]:ml-5 [&_ol]:list-decimal [&_ol]:ml-5
               [&_h2]:font-display [&_h2]:text-2xl [&_h2]:font-bold [&_h2]:mb-2
-              [&_p]:text-sm [&_p]:leading-relaxed"
-              style={{ color: textColor }}
+              [&_p]:text-sm [&_p]:leading-relaxed
+              [&_a]:underline [&_a]:cursor-pointer"
+              style={{ color: textColor, '--link-color': accentColor }}
+              onClick={e => { if (e.target.tagName === 'A' && e.target.href) { window.open(e.target.href, '_blank', 'noopener') } }}
               dangerouslySetInnerHTML={{ __html: tyContent }} />
           </div>
 
@@ -547,7 +549,9 @@ export default function PublicForm() {
               ) : field.type === 'richtext' ? (
                 <div className="text-sm leading-relaxed prose prose-sm max-w-none
                   [&_blockquote]:border-l-4 [&_blockquote]:border-raven-300 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-raven-500
-                  [&_ul]:list-disc [&_ul]:ml-5 [&_ol]:list-decimal [&_ol]:ml-5"
+                  [&_ul]:list-disc [&_ul]:ml-5 [&_ol]:list-decimal [&_ol]:ml-5
+                  [&_a]:underline [&_a]:cursor-pointer"
+                  onClick={e => { if (e.target.tagName === 'A' && e.target.href) { e.preventDefault(); window.open(e.target.href, '_blank', 'noopener') } }}
                   dangerouslySetInnerHTML={{ __html: field.content || '' }} />
               ) : field.type === 'heading' ? (
                 <h3 className="font-display text-lg font-semibold pt-2" style={{ color: textColor }}>{field.label}</h3>

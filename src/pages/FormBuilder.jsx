@@ -517,6 +517,24 @@ function RichEditor({ value, onChange, minHeight = '120px' }) {
 
         <TBtn action={() => imgInputRef.current?.click()} title="Insert Image"><ImagePlus className="w-3.5 h-3.5" /></TBtn>
         <input ref={imgInputRef} type="file" accept="image/png,image/jpeg,image/jpg" className="sr-only" onChange={handleImageInsert} />
+
+        <TBtn action={() => {
+          const url = prompt('Enter URL:', 'https://')
+          if (url && url !== 'https://') {
+            const sel = window.getSelection()
+            if (sel && sel.toString().trim()) {
+              exec('createLink', url)
+              // Make link open in new tab and style it
+              setTimeout(() => {
+                const links = editorRef.current?.querySelectorAll('a:not([target])')
+                links?.forEach(a => { a.target = '_blank'; a.rel = 'noopener noreferrer'; a.style.color = '#b8923e'; a.style.textDecoration = 'underline' })
+              }, 10)
+            } else {
+              // No text selected — insert the link with the URL as text
+              exec('insertHTML', `<a href="${url}" target="_blank" rel="noopener noreferrer" style="color:#b8923e;text-decoration:underline">${url}</a>`)
+            }
+          }
+        }} title="Insert Link"><Link2 className="w-3.5 h-3.5" /></TBtn>
       </div>
 
       <div ref={editorRef} contentEditable suppressContentEditableWarning
