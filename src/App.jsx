@@ -75,8 +75,8 @@ function LoginPage() {
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-3 mb-2">
-            <img src="/askli-icon.png" alt="Askli" className="w-16 h-16 object-contain" />
-            <span style={{ fontFamily: 'Quicksand, sans-serif', color: '#03ABFA' }} className="text-4xl font-bold">ASKLI</span>
+            <img src="/askli-icon.png" alt="Askli" className="w-20 h-20 object-contain" />
+            <span style={{ fontFamily: 'Quicksand, sans-serif', color: '#03ABFA', fontSize: '48px' }} className="font-bold">ASKLI</span>
           </div>
         </div>
 
@@ -134,16 +134,16 @@ function AdminLayout({ children }) {
     <div className="min-h-screen bg-white">
       {/* Header */}
       <header className="bg-white sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 flex items-center justify-between">
           <button onClick={() => navigate('/dashboard')} className="flex items-center gap-3 hover:opacity-80 transition-smooth">
-            <img src="/askli-icon.png" alt="Askli" className="w-14 h-14 object-contain" />
-            <span style={{ fontFamily: 'Quicksand, sans-serif', color: '#03ABFA' }} className="text-4xl font-bold">ASKLI</span>
+            <img src="/askli-icon.png" alt="Askli" style={{ width: '70px', height: '70px' }} className="object-contain" />
+            <span style={{ fontFamily: 'Quicksand, sans-serif', color: '#03ABFA', fontSize: '46px' }} className="font-bold">ASKLI</span>
           </button>
 
           <div className="flex items-center gap-3">
             <button
               onClick={() => navigate('/dashboard?templates=1')}
-              className="flex items-center gap-1.5 px-4 py-2 text-white text-sm font-semibold rounded-full transition-smooth hover:opacity-90"
+              className="flex items-center gap-1.5 px-5 py-2.5 text-white text-sm font-semibold rounded-full transition-smooth hover:opacity-90"
               style={{ backgroundColor: '#03ABFA' }}
             >
               <Plus className="w-4 h-4" />
@@ -168,7 +168,7 @@ function AdminLayout({ children }) {
           </div>
         </div>
         {/* Cyan gradient separator line */}
-        <div className="h-1" style={{ background: 'linear-gradient(90deg, #03ABFA 0%, #5BC8FC 50%, #03ABFA 100%)' }} />
+        <div className="h-1.5" style={{ background: 'linear-gradient(90deg, #03ABFA 0%, #5BC8FC 50%, #03ABFA 100%)' }} />
       </header>
 
       {/* Content */}

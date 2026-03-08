@@ -196,7 +196,7 @@ export default function Dashboard() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="font-display text-2xl font-bold" style={{ color: '#03ABFA' }}>Your Forms</h1>
+          <h1 className="font-display text-3xl font-bold" style={{ color: '#03ABFA' }}>Your Forms</h1>
           <p className="text-raven-500/80 text-sm mt-0.5">{forms.length} form{forms.length !== 1 ? 's' : ''}</p>
         </div>
       </div>
@@ -221,7 +221,7 @@ export default function Dashboard() {
         {forms.map(form => (
           <div
             key={form.form_id}
-            className="group bg-white border-2 border-[#03ABFA]/40 rounded-xl overflow-hidden hover:border-[#03ABFA] hover:shadow-lg transition-smooth"
+            className="group bg-white border-2 border-[#03ABFA]/60 rounded-xl overflow-hidden hover:border-[#03ABFA] hover:shadow-lg transition-smooth"
           >
             {/* Card Header */}
             <div className="p-5">
