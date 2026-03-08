@@ -33,9 +33,9 @@ export async function handler(event) {
       body: JSON.stringify({
         email_address: email,
         status: 'subscribed',
-        tags: ['ravenforms', `form-${formId}`],
+        tags: ['askli', `form-${formId}`],
         merge_fields: {
-          SOURCE: 'RavenForms'
+          SOURCE: 'Askli'
         }
       })
     })

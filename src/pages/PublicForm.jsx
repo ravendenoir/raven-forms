@@ -796,7 +796,7 @@ export default function PublicForm() {
         {/* Footer */}
         <div className="text-center mt-8">
           <span className="text-xs text-raven-500/30 flex items-center justify-center gap-1">
-            <Feather className="w-3 h-3" /> RavenForms
+            <Feather className="w-3 h-3" /> Askli
           </span>
         </div>
       </div>

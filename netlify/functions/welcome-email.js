@@ -20,7 +20,7 @@ export async function handler(event) {
       return { statusCode: 400, body: JSON.stringify({ error: 'Missing to or subject' }) }
     }
 
-    const senderName = fromName || 'RavenForms'
+    const senderName = fromName || 'Askli'
 
     const html = `
       <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;max-width:600px;margin:0 auto;background:#0d0d14;border:1px solid #1f1f2e;border-radius:12px;overflow:hidden;">
@@ -28,7 +28,7 @@ export async function handler(event) {
           ${body}
         </div>
         <div style="padding:16px 28px;border-top:1px solid #1f1f2e;">
-          <p style="margin:0;color:#4a4a5a;font-size:11px;">Sent via RavenForms</p>
+          <p style="margin:0;color:#4a4a5a;font-size:11px;">Sent via Askli</p>
         </div>
       </div>
     `

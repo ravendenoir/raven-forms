@@ -1,11 +1,11 @@
-import { useState, useEffect, createContext, useContext } from 'react'
+import { useState, useEffect, createContext, useContext, useRef } from 'react'
 import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom'
-import { supabase, getSession, signIn, signOut } from './lib/supabase'
+import { supabase, getSession, signIn, signOut, uploadFile } from './lib/supabase'
 import Dashboard from './pages/Dashboard'
 import FormBuilder from './pages/FormBuilder'
 import FormResponses from './pages/FormResponses'
 import PublicForm from './pages/PublicForm'
-import { LayoutGrid, LogOut, Plus, Feather } from 'lucide-react'
+import { LayoutGrid, LogOut, Plus, ImagePlus } from 'lucide-react'
 
 // ─── Auth Context ────────────────────────────────
 const AuthContext = createContext(null)
@@ -53,6 +53,7 @@ function LoginPage() {
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [appLogo] = useState(() => localStorage.getItem('askli_logo') || '')
   const navigate = useNavigate()
 
   const handleLogin = async (e) => {
@@ -75,9 +76,15 @@ function LoginPage() {
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-2 mb-3">
-            <Feather className="w-8 h-8 text-raven-300" />
+            {appLogo ? (
+              <img src={appLogo} alt="Logo" className="w-10 h-10 rounded-lg object-contain" />
+            ) : (
+              <div className="w-10 h-10 rounded-lg bg-[#03ABFA]/10 flex items-center justify-center">
+                <span style={{ fontFamily: 'Quicksand, sans-serif', color: '#03ABFA', fontWeight: 700, fontSize: '18px' }}>A</span>
+              </div>
+            )}
           </div>
-          <h1 className="font-display text-3xl font-bold text-raven-50 tracking-tight">RavenForms</h1>
+          <h1 style={{ fontFamily: 'Quicksand, sans-serif', color: '#03ABFA' }} className="text-3xl font-bold tracking-tight">Askli</h1>
           <p className="text-raven-500 text-sm mt-1 font-body">Your forms. Your data. Your rules.</p>
         </div>
 
@@ -124,6 +131,21 @@ function LoginPage() {
 function AdminLayout({ children }) {
   const navigate = useNavigate()
   const location = useLocation()
+  const [appLogo, setAppLogo] = useState(() => localStorage.getItem('askli_logo') || '')
+  const logoInputRef = useRef(null)
+
+  const handleLogoUpload = async (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    e.target.value = ''
+    try {
+      const url = await uploadFile(file, 'branding')
+      setAppLogo(url)
+      localStorage.setItem('askli_logo', url)
+    } catch (err) {
+      console.error('Logo upload failed:', err)
+    }
+  }
 
   const handleSignOut = async () => {
     await signOut()
@@ -135,15 +157,31 @@ function AdminLayout({ children }) {
       {/* Header */}
       <header className="border-b border-raven-200 bg-white/80 backdrop-blur-sm sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
-          <button onClick={() => navigate('/dashboard')} className="flex items-center gap-2 hover:opacity-80 transition-smooth">
-            <Feather className="w-5 h-5 text-raven-300" />
-            <span className="font-display text-lg font-bold text-raven-50">RavenForms</span>
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => logoInputRef.current?.click()}
+              className="group relative w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center hover:ring-2 hover:ring-[#03ABFA]/30 transition-smooth"
+              title="Click to upload logo"
+            >
+              {appLogo ? (
+                <img src={appLogo} alt="Logo" className="w-8 h-8 rounded-lg object-contain" />
+              ) : (
+                <div className="w-8 h-8 rounded-lg bg-[#03ABFA]/10 flex items-center justify-center">
+                  <ImagePlus className="w-4 h-4 text-[#03ABFA]/50 group-hover:text-[#03ABFA]" />
+                </div>
+              )}
+            </button>
+            <input ref={logoInputRef} type="file" accept="image/*" className="sr-only" onChange={handleLogoUpload} />
+            <button onClick={() => navigate('/dashboard')} className="hover:opacity-80 transition-smooth">
+              <span style={{ fontFamily: 'Quicksand, sans-serif', color: '#03ABFA' }} className="text-lg font-bold">Askli</span>
+            </button>
+          </div>
 
           <div className="flex items-center gap-3">
             <button
               onClick={() => navigate('/dashboard?templates=1')}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-raven-300 hover:bg-raven-200 text-raven-950 text-sm font-semibold rounded-lg transition-smooth"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-white text-sm font-semibold rounded-lg transition-smooth hover:opacity-90"
+              style={{ backgroundColor: '#03ABFA' }}
             >
               <Plus className="w-4 h-4" />
               <span className="hidden sm:inline">New Form</span>

@@ -43,7 +43,7 @@ export async function handler(event) {
           ${fields}
         </table>
         <div style="padding:16px 24px;border-top:1px solid #1f1f2e;">
-          <p style="margin:0;color:#4a4a5a;font-size:11px;">Sent from RavenForms</p>
+          <p style="margin:0;color:#4a4a5a;font-size:11px;">Sent from Askli</p>
         </div>
       </div>
     `
@@ -55,7 +55,7 @@ export async function handler(event) {
         'Authorization': `Bearer ${apiKey}`
       },
       body: JSON.stringify({
-        from: 'RavenForms <noreply@resend.dev>',
+        from: 'Askli <noreply@resend.dev>',
         to: [notifyEmail],
         subject: `📝 New submission: ${formTitle}`,
         html
