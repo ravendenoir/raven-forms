@@ -74,11 +74,10 @@ function LoginPage() {
       style={{ background: '#ffffff' }}>
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center gap-3 mb-4">
-            <img src="/askli-icon.png" alt="Askli" className="w-12 h-12 object-contain" />
-            <span style={{ fontFamily: 'Quicksand, sans-serif', color: '#03ABFA', letterSpacing: '0.15em' }} className="text-3xl font-bold uppercase">Askli</span>
+          <div className="inline-flex items-center gap-3 mb-2">
+            <img src="/askli-icon.png" alt="Askli" className="w-16 h-16 object-contain" />
+            <span style={{ fontFamily: 'Quicksand, sans-serif', color: '#03ABFA' }} className="text-4xl font-bold">ASKLI</span>
           </div>
-          <p className="text-raven-500 text-xs mt-1 font-body uppercase tracking-widest">Form Builder</p>
         </div>
 
         <form onSubmit={handleLogin} className="space-y-4">
@@ -134,40 +133,42 @@ function AdminLayout({ children }) {
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
-      <header className="border-b border-raven-200 bg-white sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
-          <button onClick={() => navigate('/dashboard')} className="flex items-center gap-2.5 hover:opacity-80 transition-smooth">
-            <img src="/askli-icon.png" alt="Askli" className="w-8 h-8 object-contain" />
-            <span style={{ fontFamily: 'Quicksand, sans-serif', color: '#03ABFA', letterSpacing: '0.12em' }} className="text-xl font-bold uppercase">Askli</span>
+      <header className="bg-white sticky top-0 z-40">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
+          <button onClick={() => navigate('/dashboard')} className="flex items-center gap-3 hover:opacity-80 transition-smooth">
+            <img src="/askli-icon.png" alt="Askli" className="w-14 h-14 object-contain" />
+            <span style={{ fontFamily: 'Quicksand, sans-serif', color: '#03ABFA' }} className="text-4xl font-bold">ASKLI</span>
           </button>
 
           <div className="flex items-center gap-3">
             <button
               onClick={() => navigate('/dashboard?templates=1')}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-white text-sm font-semibold rounded-lg transition-smooth hover:opacity-90"
+              className="flex items-center gap-1.5 px-4 py-2 text-white text-sm font-semibold rounded-full transition-smooth hover:opacity-90"
               style={{ backgroundColor: '#03ABFA' }}
             >
               <Plus className="w-4 h-4" />
-              <span className="hidden sm:inline">New Form</span>
+              New Form
             </button>
             <button
               onClick={() => navigate('/dashboard')}
               className={`p-2 rounded-lg transition-smooth ${
                 location.pathname === '/dashboard'
-                  ? 'bg-[#03ABFA]/10 text-[#03ABFA]'
-                  : 'text-raven-500/80 hover:text-[#03ABFA] hover:bg-[#03ABFA]/5'
+                  ? 'text-[#03ABFA]'
+                  : 'text-gray-400 hover:text-[#03ABFA]'
               }`}
             >
-              <LayoutGrid className="w-4 h-4" />
+              <LayoutGrid className="w-5 h-5" />
             </button>
             <button
               onClick={handleSignOut}
-              className="p-2 text-raven-500 hover:text-red-500 rounded-lg transition-smooth hover:bg-red-50"
+              className="p-2 text-gray-400 hover:text-red-500 rounded-lg transition-smooth"
             >
-              <LogOut className="w-4 h-4" />
+              <LogOut className="w-5 h-5" />
             </button>
           </div>
         </div>
+        {/* Cyan gradient separator line */}
+        <div className="h-1" style={{ background: 'linear-gradient(90deg, #03ABFA 0%, #5BC8FC 50%, #03ABFA 100%)' }} />
       </header>
 
       {/* Content */}
