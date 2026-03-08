@@ -822,14 +822,14 @@ function SortableFormField({ field, isSelected, onSelect, onUpdate, onDelete, on
 }
 
 // ─── Settings Modal ──────────────────────────────
-function SettingsModal({ settings, onUpdate, onClose, formDescription, onDescriptionChange, slug, onSlugChange }) {
+function SettingsPanel({ settings, onUpdate, onClose, formDescription, onDescriptionChange, slug, onSlugChange }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-sm" onClick={onClose}>
-      <div className="bg-white border border-raven-200 rounded-2xl shadow-xl w-full max-w-xl p-6 space-y-4 max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
-        <div className="flex items-center justify-between">
-          <h3 className="font-display text-lg font-semibold text-raven-50">Form Settings</h3>
-          <button onClick={onClose} className="p-1 text-raven-500 hover:text-raven-50"><X className="w-5 h-5" /></button>
-        </div>
+    <div className="w-full h-full bg-white border-l border-[#03ABFA]/30 flex flex-col">
+      <div className="flex items-center justify-between px-5 py-3 border-b border-raven-200">
+        <h3 className="font-display text-sm font-semibold text-raven-50 uppercase tracking-wider">Form Settings</h3>
+        <button onClick={onClose} className="p-1 text-raven-500 hover:text-raven-50"><X className="w-5 h-5" /></button>
+      </div>
+      <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4">
         <div>
           <label className="block text-xs text-raven-500 mb-1.5 font-medium">Form Description</label>
           <textarea value={formDescription} onChange={e => onDescriptionChange(e.target.value)} rows={2}
@@ -1067,7 +1067,7 @@ function SettingsModal({ settings, onUpdate, onClose, formDescription, onDescrip
           )}
         </div>
 
-        <button onClick={onClose} className="w-full py-2.5 bg-[#03ABFA] text-white font-semibold rounded-lg hover:bg-raven-400 transition-smooth text-sm">Done</button>
+        <button onClick={onClose} className="w-full py-2.5 bg-[#03ABFA] text-white font-semibold rounded-lg hover:opacity-90 transition-smooth text-sm">Done</button>
       </div>
     </div>
   )
@@ -1115,7 +1115,7 @@ export default function FormBuilder() {
   const [selectedFieldId, setSelectedFieldId] = useState(null)
   const [saving, setSaving] = useState(false)
   const [loading, setLoading] = useState(!isNew)
-  const [showSettings, setShowSettings] = useState(false)
+  const [showSettings, setShowSettings] = useState(true)
   const [showEmbed, setShowEmbed] = useState(false)
   const [currentPage, setCurrentPage] = useState(0)
   const [totalPages, setTotalPages] = useState(1)
@@ -1243,11 +1243,12 @@ export default function FormBuilder() {
   if (loading) return <div className="flex items-center justify-center py-20"><div className="w-6 h-6 border-2 border-[#03ABFA] border-t-transparent rounded-full animate-spin" /></div>
 
   return (
-    <div>
-      <div className="flex items-center justify-between pb-4 mb-6 border-b border-raven-200">
+    <div className="flex flex-col" style={{ height: 'calc(100vh - 120px)' }}>
+      {/* Top toolbar */}
+      <div className="flex items-center justify-between pb-4 mb-0 border-b border-raven-200">
         <button onClick={() => navigate('/dashboard')} className="p-1.5 text-raven-500 hover:text-raven-50 transition-smooth"><ArrowLeft className="w-4 h-4" /></button>
         <div className="flex items-center gap-2">
-          <button onClick={() => setShowSettings(true)} className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-raven-500 hover:text-raven-50 border border-raven-200 rounded-lg transition-smooth">
+          <button onClick={() => setShowSettings(!showSettings)} className={`flex items-center gap-1.5 px-3 py-1.5 text-xs border rounded-lg transition-smooth ${showSettings ? 'bg-[#03ABFA]/10 text-[#03ABFA] border-[#03ABFA]/30' : 'text-raven-500 hover:text-raven-50 border-raven-200'}`}>
             <Settings2 className="w-3.5 h-3.5" /> Settings
           </button>
           <button onClick={exportFormJSON} className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-raven-500 hover:text-raven-50 border border-raven-200 rounded-lg transition-smooth" title="Export form as JSON">
@@ -1278,7 +1279,11 @@ export default function FormBuilder() {
         </div>
       </div>
 
-      <div className="max-w-2xl mx-auto" data-field-container>
+      {/* Split screen: form left, settings right */}
+      <div className="flex flex-1 overflow-hidden">
+        {/* Left: Form Canvas */}
+        <div className={`flex-1 overflow-y-auto py-6 ${showSettings ? 'px-4' : 'px-4'}`}>
+          <div className={`${showSettings ? 'max-w-xl' : 'max-w-2xl'} mx-auto`} data-field-container>
         <div className="mb-6">
           <InlineLabel value={formTitle} onChange={setFormTitle} className="font-display text-2xl font-bold text-raven-50" placeholder="Form title..." />
           {formDescription && <p className="text-sm text-raven-500 mt-1">{formDescription}</p>}
@@ -1367,9 +1372,16 @@ export default function FormBuilder() {
           </div>
         )}
       </div>
+        </div>
 
-      {showSettings && <SettingsModal settings={settings} onUpdate={setSettings} onClose={() => setShowSettings(false)}
-        formDescription={formDescription} onDescriptionChange={setFormDescription} slug={slug} onSlugChange={setSlug} />}
+        {/* Right: Settings Panel */}
+        {showSettings && (
+          <div className="w-[420px] shrink-0 border-l-0 h-full overflow-hidden">
+            <SettingsPanel settings={settings} onUpdate={setSettings} onClose={() => setShowSettings(false)}
+              formDescription={formDescription} onDescriptionChange={setFormDescription} slug={slug} onSlugChange={setSlug} />
+          </div>
+        )}
+      </div>
 
       {showEmbed && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={() => setShowEmbed(false)}>
