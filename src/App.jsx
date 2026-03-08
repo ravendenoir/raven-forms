@@ -75,8 +75,8 @@ function LoginPage() {
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-3 mb-2">
-            <img src="/askli-icon.png" alt="Askli" style={{ width: '12vw', height: '12vw', minWidth: '140px', minHeight: '140px' }} className="object-contain" />
-            <span style={{ fontFamily: 'Cinzel, serif', color: '#03ABFA', fontSize: 'clamp(50px, 7vw, 110px)', lineHeight: '1' }} className="font-bold">ASKLI</span>
+            <img src="/askli-icon.png" alt="Askli" style={{ width: 'clamp(120px, 15vw, 200px)', height: 'clamp(120px, 15vw, 200px)' }} className="object-contain" />
+            <span style={{ fontFamily: 'Cinzel, serif', color: '#03ABFA', fontSize: 'clamp(36px, 5vw, 65px)', lineHeight: '1', letterSpacing: '0.04em' }} className="font-bold">ASKLI</span>
           </div>
         </div>
 
@@ -137,7 +137,7 @@ function AdminLayout({ children }) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between" style={{ padding: '0 16px' }}>
           <button onClick={() => navigate('/dashboard')} className="flex items-center gap-4 hover:opacity-80 transition-smooth">
             <img src="/askli-icon.png" alt="Askli" style={{ width: 'clamp(150px, 12vw, 200px)', height: 'clamp(150px, 12vw, 200px)' }} className="object-contain" />
-            <span style={{ fontFamily: 'Cinzel, serif', color: '#03ABFA', fontSize: 'clamp(60px, 7vw, 120px)', lineHeight: '1' }} className="font-bold">ASKLI</span>
+            <span style={{ fontFamily: 'Cinzel, serif', color: '#03ABFA', fontSize: 'clamp(36px, 3.8vw, 65px)', lineHeight: '1', letterSpacing: '0.04em' }} className="font-bold">ASKLI</span>
           </button>
 
           <div className="flex items-center gap-3">

@@ -23,7 +23,7 @@ export default {
         }
       },
       fontFamily: {
-        display: ['"Cinzel"', '"Playfair Display"', 'Georgia', 'serif'],
+        display: ['"Playfair Display"', 'Georgia', 'serif'],
         body: ['"DM Sans"', 'system-ui', 'sans-serif'],
         mono: ['"JetBrains Mono"', 'monospace'],
       }
