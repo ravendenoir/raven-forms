@@ -272,7 +272,7 @@ export default function FormResponses() {
     if (typeof val === 'boolean') return val ? 'Yes' : 'No'
     const str = String(val)
     if (str.startsWith('https://') && str.includes('form-uploads')) {
-      return <a href={str} target="_blank" rel="noopener noreferrer" className="text-raven-300 underline hover:text-raven-200">View File</a>
+      return <a href={str} target="_blank" rel="noopener noreferrer" className="text-[#03ABFA] underline hover:text-raven-200">View File</a>
     }
     return str
   }
@@ -280,7 +280,7 @@ export default function FormResponses() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <div className="w-6 h-6 border-2 border-raven-300 border-t-transparent rounded-full animate-spin" />
+        <div className="w-6 h-6 border-2 border-[#03ABFA] border-t-transparent rounded-full animate-spin" />
       </div>
     )
   }
@@ -290,7 +290,7 @@ export default function FormResponses() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <button onClick={() => navigate('/dashboard')} className="p-1.5 text-raven-500/80 hover:text-raven-300 transition-smooth">
+          <button onClick={() => navigate('/dashboard')} className="p-1.5 text-raven-500/80 hover:text-[#03ABFA] transition-smooth">
             <ArrowLeft className="w-4 h-4" />
           </button>
           <div>
@@ -306,7 +306,7 @@ export default function FormResponses() {
               {form?.slug && (
                 <button
                   onClick={() => window.open(`/f/${form.slug}`, '_blank')}
-                  className="ml-2 inline-flex items-center gap-1 text-raven-500/70 hover:text-raven-300 transition-smooth"
+                  className="ml-2 inline-flex items-center gap-1 text-raven-500/70 hover:text-[#03ABFA] transition-smooth"
                 >
                   <ExternalLink className="w-3 h-3" /> View form
                 </button>
@@ -343,7 +343,7 @@ export default function FormResponses() {
           <button
             onClick={exportCSV}
             disabled={submissions.length === 0}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-raven-300 text-raven-950 text-xs font-semibold rounded-lg hover:bg-raven-200 transition-smooth disabled:opacity-50"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#03ABFA] text-white text-xs font-semibold rounded-lg hover:bg-[#03ABFA]/90 transition-smooth disabled:opacity-50"
           >
             <Download className="w-3.5 h-3.5" />
             Export CSV
@@ -396,11 +396,11 @@ export default function FormResponses() {
       {submissions.length > 0 && (
         <div className="flex gap-1 mb-4">
           <button onClick={() => setViewTab('responses')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition-smooth ${viewTab === 'responses' ? 'bg-raven-300 text-white' : 'text-raven-500 hover:bg-raven-900'}`}>
+            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition-smooth ${viewTab === 'responses' ? 'bg-[#03ABFA] text-white' : 'text-raven-500 hover:bg-raven-900'}`}>
             <List className="w-3.5 h-3.5" /> Responses
           </button>
           <button onClick={() => setViewTab('summary')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition-smooth ${viewTab === 'summary' ? 'bg-raven-300 text-white' : 'text-raven-500 hover:bg-raven-900'}`}>
+            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition-smooth ${viewTab === 'summary' ? 'bg-[#03ABFA] text-white' : 'text-raven-500 hover:bg-raven-900'}`}>
             <BarChart3 className="w-3.5 h-3.5" /> Summary
           </button>
         </div>
@@ -482,17 +482,17 @@ export default function FormResponses() {
       ) : viewTab === 'responses' ? (
         <>
           {/* Table */}
-          <div className="bg-raven-850 border border-raven-800/40 rounded-xl overflow-hidden">
+          <div className="bg-raven-850 border border-raven-200 rounded-xl overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-raven-800/30">
+                  <tr className="border-b border-raven-200">
                     <th className="w-10 px-3 py-3">
                       <input
                         type="checkbox"
                         checked={selectedIds.size === pageSubmissions.length && pageSubmissions.length > 0}
                         onChange={toggleSelectAll}
-                        className="w-3.5 h-3.5 rounded border-raven-200 bg-white accent-raven-300"
+                        className="w-3.5 h-3.5 rounded border-raven-200 bg-white accent-[#03ABFA]"
                       />
                     </th>
                     <th className="px-3 py-3 text-left text-xs font-medium text-raven-500/80 uppercase tracking-wider whitespace-nowrap">
@@ -513,7 +513,7 @@ export default function FormResponses() {
                           type="checkbox"
                           checked={selectedIds.has(sub.id)}
                           onChange={() => toggleSelect(sub.id)}
-                          className="w-3.5 h-3.5 rounded border-raven-200 bg-white accent-raven-300"
+                          className="w-3.5 h-3.5 rounded border-raven-200 bg-white accent-[#03ABFA]"
                         />
                       </td>
                       <td className="px-3 py-2.5 text-xs text-raven-500 whitespace-nowrap">
@@ -541,14 +541,14 @@ export default function FormResponses() {
                 <button
                   onClick={() => setPage(p => Math.max(0, p - 1))}
                   disabled={page === 0}
-                  className="p-1.5 text-raven-500/80 hover:text-raven-300 disabled:opacity-30 transition-smooth"
+                  className="p-1.5 text-raven-500/80 hover:text-[#03ABFA] disabled:opacity-30 transition-smooth"
                 >
                   <ChevronLeft className="w-4 h-4" />
                 </button>
                 <button
                   onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))}
                   disabled={page === totalPages - 1}
-                  className="p-1.5 text-raven-500/80 hover:text-raven-300 disabled:opacity-30 transition-smooth"
+                  className="p-1.5 text-raven-500/80 hover:text-[#03ABFA] disabled:opacity-30 transition-smooth"
                 >
                   <ChevronRight className="w-4 h-4" />
                 </button>
@@ -606,7 +606,7 @@ export default function FormResponses() {
             <button
               onClick={handleAddRecord}
               disabled={addingRecord || Object.values(newRecord).every(v => !v)}
-              className="w-full py-2.5 bg-raven-300 text-white font-semibold rounded-lg hover:bg-raven-400 transition-smooth text-sm disabled:opacity-50"
+              className="w-full py-2.5 bg-[#03ABFA] text-white font-semibold rounded-lg hover:bg-raven-400 transition-smooth text-sm disabled:opacity-50"
             >
               {addingRecord ? 'Adding...' : 'Add Record'}
             </button>

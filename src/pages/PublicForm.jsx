@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import { getFormBySlug, submitForm, uploadFile, triggerMailchimp, triggerNotification, triggerWelcomeEmail, checkDuplicateEmailByField, trackFormView, getSubmissions, getSubmissionCount } from '../lib/supabase'
-import { Feather, Star, CheckCircle2, AlertCircle, Loader2, Upload, X, Lock } from 'lucide-react'
+import { Star, CheckCircle2, AlertCircle, Loader2, Upload, X, Lock } from 'lucide-react'
 
 export default function PublicForm() {
   const { slug } = useParams()
@@ -344,7 +344,7 @@ export default function PublicForm() {
     return (
       <div className="min-h-screen flex items-center justify-center"
         style={{ backgroundColor: bgColor }}>
-        <Loader2 className="w-6 h-6 text-raven-300 animate-spin" />
+        <Loader2 className="w-6 h-6 text-[#03ABFA] animate-spin" />
       </div>
     )
   }
@@ -369,7 +369,7 @@ export default function PublicForm() {
       <div className="min-h-screen flex items-center justify-center px-4"
         style={{ backgroundColor: bgColor }}>
         <div className="text-center">
-          <AlertCircle className="w-10 h-10 text-raven-300/60 mx-auto mb-3" />
+          <AlertCircle className="w-10 h-10 text-[#03ABFA]/60 mx-auto mb-3" />
           <p className="text-sm" style={{ color: textColor }}>{formClosed}</p>
         </div>
       </div>
@@ -418,7 +418,7 @@ export default function PublicForm() {
           <div className="text-center">
             <CheckCircle2 className="w-12 h-12 mx-auto mb-4" style={{ color: accentColor }} />
             <div className="prose prose-sm max-w-none
-              [&_blockquote]:border-l-4 [&_blockquote]:border-raven-300 [&_blockquote]:pl-4 [&_blockquote]:italic
+              [&_blockquote]:border-l-4 [&_blockquote]:border-[#03ABFA] [&_blockquote]:pl-4 [&_blockquote]:italic
               [&_ul]:list-disc [&_ul]:ml-5 [&_ol]:list-decimal [&_ol]:ml-5
               [&_h2]:font-display [&_h2]:text-2xl [&_h2]:font-bold [&_h2]:mb-2
               [&_p]:text-sm [&_p]:leading-relaxed
@@ -549,7 +549,7 @@ export default function PublicForm() {
                 ) : null
               ) : field.type === 'richtext' ? (
                 <div className="text-sm leading-relaxed prose prose-sm max-w-none
-                  [&_blockquote]:border-l-4 [&_blockquote]:border-raven-300 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-raven-500
+                  [&_blockquote]:border-l-4 [&_blockquote]:border-[#03ABFA] [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-raven-500
                   [&_ul]:list-disc [&_ul]:ml-5 [&_ol]:list-decimal [&_ol]:ml-5
                   [&_a]:underline [&_a]:cursor-pointer"
                   onClick={e => { if (e.target.tagName === 'A' && e.target.href) { e.preventDefault(); window.open(e.target.href, '_blank', 'noopener') } }}
@@ -611,7 +611,7 @@ export default function PublicForm() {
                       {(field.options || []).map(o => (
                         <label key={o} className="flex items-center gap-3 cursor-pointer group">
                           <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-smooth ${
-                            values[field.id] === o ? 'border-transparent' : 'border-raven-200 group-hover:border-raven-300'
+                            values[field.id] === o ? 'border-transparent' : 'border-raven-200 group-hover:border-[#03ABFA]'
                           }`} style={values[field.id] === o ? { borderColor: accentColor } : {}}>
                             {values[field.id] === o && (
                               <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: accentColor }} />
@@ -634,7 +634,7 @@ export default function PublicForm() {
                         return (
                           <label key={o} className="flex items-center gap-3 cursor-pointer group">
                             <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-smooth ${
-                              checked ? 'border-transparent' : 'border-raven-200 group-hover:border-raven-300'
+                              checked ? 'border-transparent' : 'border-raven-200 group-hover:border-[#03ABFA]'
                             }`} style={checked ? { borderColor: accentColor, backgroundColor: accentColor } : {}}>
                               {checked && (
                                 <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke={buttonTextColor} strokeWidth={3}>
@@ -727,7 +727,7 @@ export default function PublicForm() {
                         {(field.options || []).map(o => (
                           <label key={o} className="flex-1 text-center cursor-pointer group">
                             <div className={`w-6 h-6 rounded-full border-2 mx-auto mb-1 flex items-center justify-center transition-smooth ${
-                              values[field.id] === o ? 'border-transparent' : 'border-raven-200 group-hover:border-raven-300'
+                              values[field.id] === o ? 'border-transparent' : 'border-raven-200 group-hover:border-[#03ABFA]'
                             }`} style={values[field.id] === o ? { borderColor: accentColor, backgroundColor: accentColor } : {}}>
                               {values[field.id] === o && (
                                 <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
@@ -796,7 +796,7 @@ export default function PublicForm() {
         {/* Footer */}
         <div className="text-center mt-8">
           <span className="text-xs text-raven-500/30 flex items-center justify-center gap-1">
-            <Feather className="w-3 h-3" /> Askli
+            <img src="/askli-icon.png" alt="" className="w-3 h-3 object-contain" /> Askli
           </span>
         </div>
       </div>

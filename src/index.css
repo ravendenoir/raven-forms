@@ -3,14 +3,18 @@
 @tailwind utilities;
 
 :root {
-  --raven-gold: #b8923e;
-  --raven-gold-dim: #a07d2f;
-  --raven-bg: #faf7f2;
-  --raven-surface: #f3efe8;
+  --raven-gold: #03ABFA;
+  --raven-gold-dim: #0299e0;
+  --raven-bg: #ffffff;
+  --raven-surface: #f8f9fc;
   --raven-card: #ffffff;
-  --raven-border: #e5ddd0;
-  --raven-text: #2a2520;
-  --raven-muted: #8a8078;
+  --raven-border: #e2e8f0;
+  --raven-text: #1a1a2e;
+  --raven-muted: #64748b;
+  --askli-cyan: #03ABFA;
+  --askli-purple: #9333EA;
+  --askli-pink: #E91E8F;
+  --askli-gold: #D4A017;
 }
 
 * {
@@ -21,7 +25,7 @@
 
 body {
   font-family: 'DM Sans', system-ui, sans-serif;
-  background-color: var(--raven-bg);
+  background-color: #ffffff;
   color: var(--raven-text);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -36,8 +40,8 @@ body {
 /* Form field focus */
 input:focus, textarea:focus, select:focus {
   outline: none;
-  border-color: var(--raven-gold) !important;
-  box-shadow: 0 0 0 2px rgba(184, 146, 62, 0.15);
+  border-color: var(--askli-cyan) !important;
+  box-shadow: 0 0 0 2px rgba(3, 171, 250, 0.15);
 }
 
 /* Drag ghost */

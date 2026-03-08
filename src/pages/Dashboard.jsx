@@ -186,7 +186,7 @@ export default function Dashboard() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <div className="w-6 h-6 border-2 border-raven-300 border-t-transparent rounded-full animate-spin" />
+        <div className="w-6 h-6 border-2 border-[#03ABFA] border-t-transparent rounded-full animate-spin" />
       </div>
     )
   }
@@ -208,7 +208,7 @@ export default function Dashboard() {
           <p className="text-raven-500/80 text-sm mb-4">No forms yet.</p>
           <button
             onClick={() => setShowTemplates(true)}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-raven-300 text-raven-950 text-sm font-semibold rounded-lg hover:bg-raven-200 transition-smooth"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-[#03ABFA] text-white text-sm font-semibold rounded-lg hover:bg-[#03ABFA]/90 transition-smooth"
           >
             <Plus className="w-4 h-4" />
             Create Your First Form
@@ -221,7 +221,7 @@ export default function Dashboard() {
         {forms.map(form => (
           <div
             key={form.form_id}
-            className="group bg-raven-850 border border-raven-800/40 rounded-xl overflow-hidden hover:border-raven-300/20 transition-smooth"
+            className="group bg-raven-850 border border-raven-200 rounded-xl overflow-hidden hover:border-[#03ABFA]/20 transition-smooth"
           >
             {/* Card Header */}
             <div className="p-5">
@@ -245,14 +245,14 @@ export default function Dashboard() {
                 <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-smooth">
                   <button
                     onClick={() => navigate(`/forms/${form.form_id}/edit`)}
-                    className="p-1.5 text-raven-500/80 hover:text-raven-300 hover:bg-raven-800/60 rounded-md transition-smooth"
+                    className="p-1.5 text-raven-500/80 hover:text-[#03ABFA] hover:bg-[#03ABFA]/10 rounded-md transition-smooth"
                     title="Edit"
                   >
                     <Pencil className="w-3.5 h-3.5" />
                   </button>
                   <button
                     onClick={() => handleDuplicate(form.form_id)}
-                    className="p-1.5 text-raven-500/80 hover:text-raven-300 hover:bg-raven-800/60 rounded-md transition-smooth"
+                    className="p-1.5 text-raven-500/80 hover:text-[#03ABFA] hover:bg-[#03ABFA]/10 rounded-md transition-smooth"
                     title="Duplicate"
                   >
                     <Copy className="w-3.5 h-3.5" />
@@ -281,17 +281,17 @@ export default function Dashboard() {
             </div>
 
             {/* Card Footer */}
-            <div className="border-t border-raven-800/30 px-5 py-3 flex items-center justify-between">
+            <div className="border-t border-raven-200 px-5 py-3 flex items-center justify-between">
               <button
                 onClick={() => navigate(`/forms/${form.form_id}/responses`)}
-                className="text-xs text-raven-500 hover:text-raven-300 font-medium transition-smooth"
+                className="text-xs text-raven-500 hover:text-[#03ABFA] font-medium transition-smooth"
               >
                 View Responses →
               </button>
               {form.published && (
                 <button
                   onClick={() => window.open(getFormUrl(form.slug), '_blank')}
-                  className="flex items-center gap-1 text-xs text-raven-500/70 hover:text-raven-300 transition-smooth"
+                  className="flex items-center gap-1 text-xs text-raven-500/70 hover:text-[#03ABFA] transition-smooth"
                   title="Open public link"
                 >
                   <ExternalLink className="w-3 h-3" />
@@ -318,9 +318,9 @@ export default function Dashboard() {
                 const Icon = tmpl.icon
                 return (
                   <button key={tmpl.id} onClick={() => handleCreateForm(tmpl)}
-                    className="flex flex-col items-center gap-2 p-5 rounded-xl border border-raven-200 hover:border-raven-300 hover:shadow-md transition-smooth text-center group">
-                    <div className="w-10 h-10 rounded-lg bg-raven-900 flex items-center justify-center group-hover:bg-raven-300/10 transition-smooth">
-                      <Icon className="w-5 h-5 text-raven-300" />
+                    className="flex flex-col items-center gap-2 p-5 rounded-xl border border-raven-200 hover:border-[#03ABFA] hover:shadow-md transition-smooth text-center group">
+                    <div className="w-10 h-10 rounded-lg bg-raven-900 flex items-center justify-center group-hover:bg-[#03ABFA]/10 transition-smooth">
+                      <Icon className="w-5 h-5 text-[#03ABFA]" />
                     </div>
                     <span className="text-sm font-medium text-raven-50">{tmpl.name}</span>
                     <span className="text-[10px] text-raven-500 leading-snug">{tmpl.description}</span>

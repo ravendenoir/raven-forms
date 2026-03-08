@@ -91,13 +91,13 @@ function AddFieldButton({ onAdd, position, alwaysShow }) {
 
   return (
     <div className="relative flex items-center justify-center py-2 group" ref={ref}>
-      <div className="absolute inset-x-8 top-1/2 h-px bg-transparent group-hover:bg-raven-200 transition-smooth" />
+      <div className="absolute inset-x-8 top-1/2 h-px bg-transparent group-hover:bg-[#03ABFA]/90 transition-smooth" />
       <button
         onClick={() => setOpen(!open)}
         className={`relative z-10 w-7 h-7 flex items-center justify-center rounded-full border transition-smooth ${
-          open ? 'bg-raven-300 border-raven-300 text-white'
-            : alwaysShow ? 'bg-white border-raven-300 text-raven-300 hover:bg-raven-300 hover:text-white shadow-sm'
-            : 'bg-white border-raven-200 text-raven-500 opacity-0 group-hover:opacity-100 hover:border-raven-300 hover:text-raven-300'
+          open ? 'bg-[#03ABFA] border-[#03ABFA] text-white'
+            : alwaysShow ? 'bg-white border-[#03ABFA] text-[#03ABFA] hover:bg-[#03ABFA] hover:text-white shadow-sm'
+            : 'bg-white border-raven-200 text-raven-500 opacity-0 group-hover:opacity-100 hover:border-[#03ABFA] hover:text-[#03ABFA]'
         }`}
       >
         <Plus className="w-4 h-4" />
@@ -111,7 +111,7 @@ function AddFieldButton({ onAdd, position, alwaysShow }) {
               return (
                 <button key={ft.type} onClick={() => { onAdd(ft.type, position); setOpen(false) }}
                   className="flex items-center gap-2 px-2.5 py-2 text-sm text-raven-700 hover:bg-raven-900 rounded-lg transition-smooth text-left">
-                  <Icon className="w-4 h-4 text-raven-300 shrink-0" /> {ft.label}
+                  <Icon className="w-4 h-4 text-[#03ABFA] shrink-0" /> {ft.label}
                 </button>
               )
             })}
@@ -123,7 +123,7 @@ function AddFieldButton({ onAdd, position, alwaysShow }) {
               return (
                 <button key={ft.type} onClick={() => { onAdd(ft.type, position); setOpen(false) }}
                   className="flex items-center gap-2 px-2.5 py-2 text-sm text-raven-700 hover:bg-raven-900 rounded-lg transition-smooth text-left">
-                  <Icon className="w-4 h-4 text-raven-300 shrink-0" /> {ft.label}
+                  <Icon className="w-4 h-4 text-[#03ABFA] shrink-0" /> {ft.label}
                 </button>
               )
             })}
@@ -155,7 +155,7 @@ function FloatingToolbar({ field, onUpdate, onDelete, onDuplicate, fields, formS
 
       {!isContent && (
         <button onClick={() => onUpdate({ ...field, required: !field.required })}
-          className={`px-2.5 py-1.5 text-xs font-medium rounded-md transition-smooth ${field.required ? 'bg-raven-300 text-white' : 'text-raven-500 hover:bg-raven-900'}`}>
+          className={`px-2.5 py-1.5 text-xs font-medium rounded-md transition-smooth ${field.required ? 'bg-[#03ABFA] text-white' : 'text-raven-500 hover:bg-raven-900'}`}>
           Required
         </button>
       )}
@@ -165,7 +165,7 @@ function FloatingToolbar({ field, onUpdate, onDelete, onDuplicate, fields, formS
         <div className="flex items-center border-l border-raven-200 ml-0.5 pl-0.5">
           {['full', 'two-thirds', 'half', 'third', 'quarter'].map(w => (
             <button key={w} onClick={() => onUpdate({ ...field, width: w })}
-              className={`px-2 py-1.5 text-[10px] font-medium rounded-md transition-smooth ${field.width === w ? 'bg-raven-900 text-raven-300' : 'text-raven-500 hover:bg-raven-900'}`}
+              className={`px-2 py-1.5 text-[10px] font-medium rounded-md transition-smooth ${field.width === w ? 'bg-raven-900 text-[#03ABFA]' : 'text-raven-500 hover:bg-raven-900'}`}
               title={w === 'full' ? '100%' : w === 'two-thirds' ? '66%' : w === 'half' ? '50%' : w === 'third' ? '33%' : '25%'}>
               {w === 'full' ? '1/1' : w === 'two-thirds' ? '2/3' : w === 'half' ? '1/2' : w === 'third' ? '1/3' : '1/4'}
             </button>
@@ -174,7 +174,7 @@ function FloatingToolbar({ field, onUpdate, onDelete, onDuplicate, fields, formS
       )}
 
       <button onClick={() => setShowSettings(!showSettings)}
-        className={`p-1.5 rounded-md transition-smooth ${showSettings ? 'bg-raven-900 text-raven-300' : 'text-raven-500 hover:bg-raven-900'}`}>
+        className={`p-1.5 rounded-md transition-smooth ${showSettings ? 'bg-raven-900 text-[#03ABFA]' : 'text-raven-500 hover:bg-raven-900'}`}>
         <Settings2 className="w-4 h-4" />
       </button>
       <button onClick={() => onDuplicate(field.id)} className="p-1.5 text-raven-500 hover:bg-raven-900 rounded-md transition-smooth">
@@ -215,7 +215,7 @@ function FloatingToolbar({ field, onUpdate, onDelete, onDuplicate, fields, formS
                   </div>
                 ))}
                 <button onClick={() => onUpdate({ ...field, options: [...(field.options || []), `Option ${(field.options?.length || 0) + 1}`] })}
-                  className="text-xs text-raven-300 hover:text-raven-400 font-medium">+ Add option</button>
+                  className="text-xs text-[#03ABFA] hover:text-raven-400 font-medium">+ Add option</button>
               </div>
             </div>
           )}
@@ -240,7 +240,7 @@ function FloatingToolbar({ field, onUpdate, onDelete, onDuplicate, fields, formS
                     </div>
                   ))}
                   <button onClick={() => onUpdate({ ...field, options: [...(field.options || []), `Level ${(field.options?.length || 0) + 1}`] })}
-                    className="text-xs text-raven-300 hover:text-raven-400 font-medium">+ Add level</button>
+                    className="text-xs text-[#03ABFA] hover:text-raven-400 font-medium">+ Add level</button>
                 </div>
               </div>
             </div>
@@ -348,7 +348,7 @@ function FloatingToolbar({ field, onUpdate, onDelete, onDuplicate, fields, formS
                 )
               })}
               <button onClick={() => onUpdate({ ...field, conditions: [...(field.conditions || []), { fieldId: '', operator: 'equals', value: '' }] })}
-                className="text-xs text-raven-300 hover:text-raven-400 font-medium">+ Add condition</button>
+                className="text-xs text-[#03ABFA] hover:text-raven-400 font-medium">+ Add condition</button>
             </div>
           )}
         </div>
@@ -366,11 +366,11 @@ function InlineLabel({ value, onChange, className, placeholder }) {
   if (editing) {
     return <input ref={inputRef} type="text" value={value} onChange={e => onChange(e.target.value)}
       onBlur={() => setEditing(false)} onKeyDown={e => { if (e.key === 'Enter') setEditing(false) }}
-      className={`bg-transparent border-0 border-b-2 border-raven-300 outline-none w-full ${className}`} placeholder={placeholder} />
+      className={`bg-transparent border-0 border-b-2 border-[#03ABFA] outline-none w-full ${className}`} placeholder={placeholder} />
   }
   return (
     <span onClick={e => { e.stopPropagation(); setEditing(true) }}
-      className={`cursor-text hover:bg-raven-300/10 rounded px-1 -mx-1 transition-smooth inline-block ${className}`} title="Click to edit">
+      className={`cursor-text hover:bg-[#03ABFA]/10 rounded px-1 -mx-1 transition-smooth inline-block ${className}`} title="Click to edit">
       {value || <span className="text-raven-500/50 italic">{placeholder}</span>}
     </span>
   )
@@ -539,7 +539,7 @@ function RichEditor({ value, onChange, minHeight = '120px' }) {
 
       <div ref={editorRef} contentEditable suppressContentEditableWarning
         className="px-4 py-3 text-sm text-raven-50 leading-relaxed focus:outline-none prose prose-sm max-w-none
-          [&_blockquote]:border-l-4 [&_blockquote]:border-raven-300 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-raven-500
+          [&_blockquote]:border-l-4 [&_blockquote]:border-[#03ABFA] [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-raven-500
           [&_ul]:list-disc [&_ul]:ml-5 [&_ol]:list-decimal [&_ol]:ml-5"
         style={{ minHeight }}
         onInput={handleInput}
@@ -572,8 +572,8 @@ function InlineRichText({ value, onChange }) {
 
   return (
     <div onClick={e => { e.stopPropagation(); setEditing(true) }}
-      className="cursor-text text-sm text-raven-700 leading-relaxed hover:bg-raven-300/5 rounded-lg p-2 -m-2 transition-smooth prose prose-sm max-w-none
-        [&_blockquote]:border-l-4 [&_blockquote]:border-raven-300 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-raven-500
+      className="cursor-text text-sm text-raven-700 leading-relaxed hover:bg-[#03ABFA]/5 rounded-lg p-2 -m-2 transition-smooth prose prose-sm max-w-none
+        [&_blockquote]:border-l-4 [&_blockquote]:border-[#03ABFA] [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-raven-500
         [&_ul]:list-disc [&_ul]:ml-5 [&_ol]:list-decimal [&_ol]:ml-5"
       dangerouslySetInnerHTML={{ __html: value || '<span class="text-raven-500/50 italic">Click to edit text block...</span>' }} />
   )
@@ -637,7 +637,7 @@ function ImageUploadBlock({ field, onUpdate, type }) {
             <span className="text-[10px] text-raven-500 shrink-0">Position</span>
             <input type="range" min="0" max="100" value={posY}
               onChange={e => onUpdate({ ...field, imagePositionY: parseInt(e.target.value) })}
-              className="flex-1 h-1 accent-raven-300 cursor-pointer" />
+              className="flex-1 h-1 accent-[#03ABFA] cursor-pointer" />
           </div>
           <button onClick={() => onUpdate({ ...field, imageUrl: '' })}
             className="absolute top-2 right-2 p-1.5 bg-white/90 rounded-full text-raven-500 hover:text-red-500 opacity-0 group-hover/img:opacity-100 transition-smooth shadow">
@@ -675,13 +675,13 @@ function ImageUploadBlock({ field, onUpdate, type }) {
           <div onMouseDown={startResize}
             className="absolute top-0 right-0 w-3 h-full cursor-ew-resize opacity-0 group-hover/img:opacity-100 transition-smooth flex items-center justify-center"
             style={{ transform: 'translateX(50%)' }}>
-            <div className="w-1 h-8 bg-raven-300 rounded-full" />
+            <div className="w-1 h-8 bg-[#03ABFA] rounded-full" />
           </div>
           {/* Bottom-right corner resize handle */}
           <div onMouseDown={startResize}
             className="absolute bottom-0 right-0 w-4 h-4 cursor-nwse-resize opacity-0 group-hover/img:opacity-100 transition-smooth"
             style={{ transform: 'translate(25%, 25%)' }}>
-            <div className="w-3 h-3 border-r-2 border-b-2 border-raven-300 rounded-br" />
+            <div className="w-3 h-3 border-r-2 border-b-2 border-[#03ABFA] rounded-br" />
           </div>
         </div>
         <button onClick={() => onUpdate({ ...field, imageUrl: '' })}
@@ -693,16 +693,16 @@ function ImageUploadBlock({ field, onUpdate, type }) {
   }
 
   return (
-    <label className={`flex flex-col items-center justify-center border-2 border-dashed border-raven-200 rounded-lg cursor-pointer hover:border-raven-300 transition-smooth ${
+    <label className={`flex flex-col items-center justify-center border-2 border-dashed border-raven-200 rounded-lg cursor-pointer hover:border-[#03ABFA] transition-smooth ${
       isBanner ? 'py-10' : 'py-6'
     }`}>
       {uploading ? (
-        <Loader2 className="w-6 h-6 text-raven-300 animate-spin" />
+        <Loader2 className="w-6 h-6 text-[#03ABFA] animate-spin" />
       ) : (
         <>
-          {isBanner ? <Image className="w-8 h-8 text-raven-300 mb-2" />
-            : isAvatar ? <UserCircle className="w-8 h-8 text-raven-300 mb-2" />
-            : <Upload className="w-6 h-6 text-raven-300 mb-2" />}
+          {isBanner ? <Image className="w-8 h-8 text-[#03ABFA] mb-2" />
+            : isAvatar ? <UserCircle className="w-8 h-8 text-[#03ABFA] mb-2" />
+            : <Upload className="w-6 h-6 text-[#03ABFA] mb-2" />}
           <p className="text-sm text-raven-500">
             {isBanner ? 'Upload banner image' : isAvatar ? 'Upload avatar image' : 'Upload an image'}
           </p>
@@ -724,7 +724,7 @@ function SortableFormField({ field, isSelected, onSelect, onUpdate, onDelete, on
   return (
     <div ref={setNodeRef} style={style} onClick={() => onSelect(field.id)}
       className={`relative group rounded-xl p-5 transition-smooth cursor-pointer inline-block align-top ${widthClass} ${
-        isSelected ? 'bg-white ring-2 ring-raven-300/40 shadow-sm' : 'bg-white hover:shadow-sm'
+        isSelected ? 'bg-white ring-2 ring-[#03ABFA]/40 shadow-sm' : 'bg-white hover:shadow-sm'
       }`}>
       <div {...attributes} {...listeners}
         className="absolute left-1 top-1/2 -translate-y-1/2 p-1 opacity-0 group-hover:opacity-100 cursor-grab active:cursor-grabbing text-raven-200 hover:text-raven-500 transition-smooth">
@@ -751,7 +751,7 @@ function SortableFormField({ field, isSelected, onSelect, onUpdate, onDelete, on
             <div className="mb-2">
               <InlineLabel value={field.label} onChange={val => onUpdate({ ...field, label: val })}
                 className="text-sm font-medium text-raven-50" placeholder="Field label..." />
-              {field.required && <span className="text-raven-300 ml-0.5 text-sm">*</span>}
+              {field.required && <span className="text-[#03ABFA] ml-0.5 text-sm">*</span>}
             </div>
             {field.description && <p className="text-xs text-raven-500 mb-2">{field.description}</p>}
 
@@ -789,7 +789,7 @@ function SortableFormField({ field, isSelected, onSelect, onUpdate, onDelete, on
               <div className="space-y-2">
                 <input type="range" min={field.min ?? 0} max={field.max ?? 100} step={field.step ?? 1}
                   defaultValue={Math.round(((field.min ?? 0) + (field.max ?? 100)) / 2)}
-                  className="w-full accent-raven-300 pointer-events-none" readOnly />
+                  className="w-full accent-[#03ABFA] pointer-events-none" readOnly />
                 <div className="flex justify-between text-xs text-raven-500">
                   <span>{field.min ?? 0}</span><span>{field.max ?? 100}</span>
                 </div>
@@ -914,7 +914,7 @@ function SettingsModal({ settings, onUpdate, onClose, formDescription, onDescrip
                           if (result?.sRGBHex) onUpdate({ ...settings, [c.key]: result.sRGBHex })
                         } catch (e) { /* user cancelled */ }
                       }}
-                      className="p-1 rounded hover:bg-raven-900 text-raven-500 hover:text-raven-300 transition-smooth"
+                      className="p-1 rounded hover:bg-raven-900 text-raven-500 hover:text-[#03ABFA] transition-smooth"
                     >
                       <Pipette className="w-3.5 h-3.5" />
                     </button>
@@ -932,7 +932,7 @@ function SettingsModal({ settings, onUpdate, onClose, formDescription, onDescrip
           <div className="flex gap-2">
             {['form', 'quiz', 'poll'].map(mode => (
               <button key={mode} onClick={() => onUpdate({ ...settings, form_mode: mode })}
-                className={`flex-1 py-2 text-xs font-medium rounded-lg transition-smooth ${(settings.form_mode || 'form') === mode ? 'bg-raven-300 text-white' : 'bg-raven-900 text-raven-500 hover:text-raven-50'}`}>
+                className={`flex-1 py-2 text-xs font-medium rounded-lg transition-smooth ${(settings.form_mode || 'form') === mode ? 'bg-[#03ABFA] text-white' : 'bg-raven-900 text-raven-500 hover:text-raven-50'}`}>
                 {mode.charAt(0).toUpperCase() + mode.slice(1)}
               </button>
             ))}
@@ -945,7 +945,7 @@ function SettingsModal({ settings, onUpdate, onClose, formDescription, onDescrip
                   <p className="text-[10px] text-raven-500/60">Display score after submission</p>
                 </div>
                 <button onClick={() => onUpdate({ ...settings, show_score: !settings.show_score })}
-                  className={`w-10 h-5 rounded-full transition-smooth relative ${settings.show_score ? 'bg-raven-300' : 'bg-gray-300'}`}>
+                  className={`w-10 h-5 rounded-full transition-smooth relative ${settings.show_score ? 'bg-[#03ABFA]' : 'bg-gray-300'}`}>
                   <div className={`w-4 h-4 rounded-full bg-white shadow absolute top-0.5 transition-smooth ${settings.show_score ? 'left-5' : 'left-0.5'}`} />
                 </button>
               </div>
@@ -955,7 +955,7 @@ function SettingsModal({ settings, onUpdate, onClose, formDescription, onDescrip
                   <p className="text-[10px] text-raven-500/60">Reveal answers after submission</p>
                 </div>
                 <button onClick={() => onUpdate({ ...settings, show_correct_answers: !settings.show_correct_answers })}
-                  className={`w-10 h-5 rounded-full transition-smooth relative ${settings.show_correct_answers ? 'bg-raven-300' : 'bg-gray-300'}`}>
+                  className={`w-10 h-5 rounded-full transition-smooth relative ${settings.show_correct_answers ? 'bg-[#03ABFA]' : 'bg-gray-300'}`}>
                   <div className={`w-4 h-4 rounded-full bg-white shadow absolute top-0.5 transition-smooth ${settings.show_correct_answers ? 'left-5' : 'left-0.5'}`} />
                 </button>
               </div>
@@ -970,7 +970,7 @@ function SettingsModal({ settings, onUpdate, onClose, formDescription, onDescrip
                   <p className="text-[10px] text-raven-500/60">Display results after voting</p>
                 </div>
                 <button onClick={() => onUpdate({ ...settings, show_poll_results: !settings.show_poll_results })}
-                  className={`w-10 h-5 rounded-full transition-smooth relative ${settings.show_poll_results ? 'bg-raven-300' : 'bg-gray-300'}`}>
+                  className={`w-10 h-5 rounded-full transition-smooth relative ${settings.show_poll_results ? 'bg-[#03ABFA]' : 'bg-gray-300'}`}>
                   <div className={`w-4 h-4 rounded-full bg-white shadow absolute top-0.5 transition-smooth ${settings.show_poll_results ? 'left-5' : 'left-0.5'}`} />
                 </button>
               </div>
@@ -984,7 +984,7 @@ function SettingsModal({ settings, onUpdate, onClose, formDescription, onDescrip
           <div className="flex items-center justify-between">
             <div><span className="text-sm text-raven-50 font-medium">Mailchimp</span><p className="text-xs text-raven-500">Auto-subscribe email fields</p></div>
             <button onClick={() => onUpdate({ ...settings, mailchimp_enabled: !settings.mailchimp_enabled })}
-              className={`w-10 h-5 rounded-full transition-smooth relative ${settings.mailchimp_enabled ? 'bg-raven-300' : 'bg-gray-300'}`}>
+              className={`w-10 h-5 rounded-full transition-smooth relative ${settings.mailchimp_enabled ? 'bg-[#03ABFA]' : 'bg-gray-300'}`}>
               <div className={`w-4 h-4 rounded-full bg-white shadow absolute top-0.5 transition-smooth ${settings.mailchimp_enabled ? 'left-5' : 'left-0.5'}`} />
             </button>
           </div>
@@ -998,7 +998,7 @@ function SettingsModal({ settings, onUpdate, onClose, formDescription, onDescrip
           <div className="flex items-center justify-between">
             <div><span className="text-sm text-raven-50 font-medium">Email Notifications</span><p className="text-xs text-raven-500">Get notified on submissions</p></div>
             <button onClick={() => onUpdate({ ...settings, notification_enabled: !settings.notification_enabled })}
-              className={`w-10 h-5 rounded-full transition-smooth relative ${settings.notification_enabled ? 'bg-raven-300' : 'bg-gray-300'}`}>
+              className={`w-10 h-5 rounded-full transition-smooth relative ${settings.notification_enabled ? 'bg-[#03ABFA]' : 'bg-gray-300'}`}>
               <div className={`w-4 h-4 rounded-full bg-white shadow absolute top-0.5 transition-smooth ${settings.notification_enabled ? 'left-5' : 'left-0.5'}`} />
             </button>
           </div>
@@ -1007,7 +1007,7 @@ function SettingsModal({ settings, onUpdate, onClose, formDescription, onDescrip
           <div className="flex items-center justify-between">
             <div><span className="text-sm text-raven-50 font-medium">Welcome Email</span><p className="text-xs text-raven-500">Send confirmation to submitter</p></div>
             <button onClick={() => onUpdate({ ...settings, welcome_email_enabled: !settings.welcome_email_enabled })}
-              className={`w-10 h-5 rounded-full transition-smooth relative ${settings.welcome_email_enabled ? 'bg-raven-300' : 'bg-gray-300'}`}>
+              className={`w-10 h-5 rounded-full transition-smooth relative ${settings.welcome_email_enabled ? 'bg-[#03ABFA]' : 'bg-gray-300'}`}>
               <div className={`w-4 h-4 rounded-full bg-white shadow absolute top-0.5 transition-smooth ${settings.welcome_email_enabled ? 'left-5' : 'left-0.5'}`} />
             </button>
           </div>
@@ -1052,7 +1052,7 @@ function SettingsModal({ settings, onUpdate, onClose, formDescription, onDescrip
               <p className="text-[10px] text-raven-500/60">POST submission data to a URL on every response</p>
             </div>
             <button onClick={() => onUpdate({ ...settings, webhook_enabled: !settings.webhook_enabled })}
-              className={`w-10 h-5 rounded-full transition-smooth relative ${settings.webhook_enabled ? 'bg-raven-300' : 'bg-gray-300'}`}>
+              className={`w-10 h-5 rounded-full transition-smooth relative ${settings.webhook_enabled ? 'bg-[#03ABFA]' : 'bg-gray-300'}`}>
               <div className={`w-4 h-4 rounded-full bg-white shadow absolute top-0.5 transition-smooth ${settings.webhook_enabled ? 'left-5' : 'left-0.5'}`} />
             </button>
           </div>
@@ -1067,7 +1067,7 @@ function SettingsModal({ settings, onUpdate, onClose, formDescription, onDescrip
           )}
         </div>
 
-        <button onClick={onClose} className="w-full py-2.5 bg-raven-300 text-white font-semibold rounded-lg hover:bg-raven-400 transition-smooth text-sm">Done</button>
+        <button onClick={onClose} className="w-full py-2.5 bg-[#03ABFA] text-white font-semibold rounded-lg hover:bg-raven-400 transition-smooth text-sm">Done</button>
       </div>
     </div>
   )
@@ -1240,7 +1240,7 @@ export default function FormBuilder() {
     reader.readAsText(file)
   }
 
-  if (loading) return <div className="flex items-center justify-center py-20"><div className="w-6 h-6 border-2 border-raven-300 border-t-transparent rounded-full animate-spin" /></div>
+  if (loading) return <div className="flex items-center justify-center py-20"><div className="w-6 h-6 border-2 border-[#03ABFA] border-t-transparent rounded-full animate-spin" /></div>
 
   return (
     <div>
@@ -1272,7 +1272,7 @@ export default function FormBuilder() {
             {published ? 'Published' : 'Publish'}
           </button>
           <button onClick={handleSave} disabled={saving}
-            className="flex items-center gap-1.5 px-4 py-1.5 bg-raven-300 hover:bg-raven-400 text-white text-sm font-semibold rounded-lg transition-smooth disabled:opacity-50">
+            className="flex items-center gap-1.5 px-4 py-1.5 bg-[#03ABFA] hover:bg-raven-400 text-white text-sm font-semibold rounded-lg transition-smooth disabled:opacity-50">
             <Save className="w-3.5 h-3.5" /> {saving ? 'Saving...' : 'Save'}
           </button>
         </div>
@@ -1289,12 +1289,12 @@ export default function FormBuilder() {
           <div className="flex items-center gap-1 mb-4 pb-3 border-b border-raven-200">
             {Array.from({ length: totalPages }, (_, i) => (
               <button key={i} onClick={() => setCurrentPage(i)}
-                className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-smooth ${currentPage === i ? 'bg-raven-300 text-white' : 'text-raven-500 hover:bg-raven-900'}`}>
+                className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-smooth ${currentPage === i ? 'bg-[#03ABFA] text-white' : 'text-raven-500 hover:bg-raven-900'}`}>
                 Page {i + 1}
               </button>
             ))}
             <button onClick={() => { setTotalPages(p => p + 1); setCurrentPage(totalPages) }}
-              className="px-2 py-1.5 text-xs text-raven-500 hover:text-raven-300 transition-smooth" title="Add page">
+              className="px-2 py-1.5 text-xs text-raven-500 hover:text-[#03ABFA] transition-smooth" title="Add page">
               <Plus className="w-3.5 h-3.5" />
             </button>
             {totalPages > 1 && (
@@ -1315,7 +1315,7 @@ export default function FormBuilder() {
         {totalPages <= 1 && (
           <div className="flex items-center gap-2 mb-4">
             <button onClick={() => { setTotalPages(2); setCurrentPage(0) }}
-              className="text-xs text-raven-500 hover:text-raven-300 transition-smooth flex items-center gap-1">
+              className="text-xs text-raven-500 hover:text-[#03ABFA] transition-smooth flex items-center gap-1">
               <Plus className="w-3 h-3" /> Add pages for multi-step form
             </button>
           </div>
@@ -1350,7 +1350,7 @@ export default function FormBuilder() {
                 return (
                   <button key={ft.type} onClick={() => addFieldAt(ft.type, 0)}
                     className="flex flex-col items-center gap-1.5 px-3 py-3 text-xs text-raven-700 hover:bg-white hover:shadow-sm border border-transparent hover:border-raven-200 rounded-lg transition-smooth">
-                    <Icon className="w-5 h-5 text-raven-300" /> {ft.label}
+                    <Icon className="w-5 h-5 text-[#03ABFA]" /> {ft.label}
                   </button>
                 )
               })}
@@ -1391,7 +1391,7 @@ export default function FormBuilder() {
                 value={`${window.location.origin}/f/${slug}`}
                 onClick={e => { e.target.select(); navigator.clipboard?.writeText(e.target.value); toast('Copied to clipboard') }} />
             </div>
-            <button onClick={() => setShowEmbed(false)} className="w-full py-2.5 bg-raven-300 text-white font-semibold rounded-lg hover:bg-raven-400 transition-smooth text-sm">Done</button>
+            <button onClick={() => setShowEmbed(false)} className="w-full py-2.5 bg-[#03ABFA] text-white font-semibold rounded-lg hover:bg-raven-400 transition-smooth text-sm">Done</button>
           </div>
         </div>
       )}
