@@ -140,7 +140,8 @@ export default function Dashboard() {
       navigate(`/forms/${newForm.id}/edit`)
       toast('Form duplicated')
     } catch (err) {
-      toast('Duplicate failed', 'error')
+      console.error('Duplicate error:', err)
+      toast(`Duplicate failed: ${err.message || 'Unknown error'}`, 'error')
     }
   }
 
