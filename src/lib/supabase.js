@@ -234,8 +234,6 @@ export async function trackFormView(formId) {
 
 export async function duplicateForm(formId) {
   const original = await getForm(formId)
-  const { data: { user }, error: authError } = await supabase.auth.getUser()
-  if (authError || !user) throw new Error('Not authenticated')
   const slug = original.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/-+$/, '') + '-' + Date.now().toString(36)
   const { data, error } = await supabase
     .from('forms')
@@ -246,7 +244,6 @@ export async function duplicateForm(formId) {
       settings: original.settings || {},
       published: false,
       slug,
-      user_id: user.id,
     })
     .select()
     .single()
