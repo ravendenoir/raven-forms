@@ -989,11 +989,22 @@ function SettingsPanel({ settings, onUpdate, onClose, formDescription, onDescrip
             </button>
           </div>
           {settings.mailchimp_enabled && (
-            <div>
-              <label className="block text-xs text-raven-500 mb-1 font-medium">Email Field ID</label>
-              <input type="text" value={settings.mailchimp_email_field || ''} onChange={e => onUpdate({ ...settings, mailchimp_email_field: e.target.value })}
-                className="w-full px-3 py-2 bg-white border border-raven-200 rounded-lg text-sm text-raven-50 font-mono" />
-            </div>
+            <>
+              <div>
+                <label className="block text-xs text-raven-500 mb-1 font-medium">Email Field ID</label>
+                <input type="text" value={settings.mailchimp_email_field || ''} onChange={e => onUpdate({ ...settings, mailchimp_email_field: e.target.value })}
+                  className="w-full px-3 py-2 bg-white border border-raven-200 rounded-lg text-sm text-raven-50 font-mono" />
+              </div>
+              <div>
+                <label className="block text-xs text-raven-500 mb-1 font-medium">Mailchimp Tags</label>
+                <input type="text"
+                  value={(settings.mailchimp_tags || []).join(', ')}
+                  onChange={e => onUpdate({ ...settings, mailchimp_tags: e.target.value.split(',').map(t => t.trim()).filter(Boolean) })}
+                  placeholder="Raven"
+                  className="w-full px-3 py-2 bg-white border border-raven-200 rounded-lg text-sm text-raven-50 font-mono" />
+                <p className="text-xs text-raven-500 mt-1">Comma-separated. Applied to every subscriber from this form.</p>
+              </div>
+            </>
           )}
           <div className="flex items-center justify-between">
             <div><span className="text-sm text-raven-50 font-medium">Email Notifications</span><p className="text-xs text-raven-500">Get notified on submissions</p></div>
@@ -1088,6 +1099,7 @@ export default function FormBuilder() {
     thank_you_url: '',
     mailchimp_enabled: false,
     mailchimp_email_field: '',
+    mailchimp_tags: [],
     notification_enabled: true,
     submit_button_text: 'Submit',
     welcome_email_enabled: false,

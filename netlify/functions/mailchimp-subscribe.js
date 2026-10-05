@@ -1,5 +1,8 @@
 // Netlify Function: Mailchimp Subscriber
-// Adds email to your Mailchimp audience when a form is submitted
+// Adds email to your Mailchimp audience when a form is submitted,
+// and applies the per-form tags set in form settings (mailchimp_tags).
+
+import crypto from 'node:crypto'
 
 export async function handler(event) {
   if (event.httpMethod !== 'POST') {
@@ -7,7 +10,7 @@ export async function handler(event) {
   }
 
   try {
-    const { email, formId } = JSON.parse(event.body)
+    const { email, tags = [] } = JSON.parse(event.body)
 
     if (!email) {
       return { statusCode: 400, body: JSON.stringify({ error: 'Email is required' }) }
@@ -22,38 +25,63 @@ export async function handler(event) {
       return { statusCode: 200, body: JSON.stringify({ skipped: true }) }
     }
 
-    const url = `https://${server}.api.mailchimp.com/3.0/lists/${listId}/members`
+    const clean = String(email).trim()
+    const base = `https://${server}.api.mailchimp.com/3.0/lists/${listId}`
+    const hash = crypto.createHash('md5').update(clean.toLowerCase()).digest('hex')
+    const headers = {
+      'Content-Type': 'application/json',
+      'Authorization': `Basic ${Buffer.from(`anystring:${apiKey}`).toString('base64')}`
+    }
 
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Basic ${Buffer.from(`anystring:${apiKey}`).toString('base64')}`
-      },
+    // Upsert the contact. status_if_new only applies to brand-new contacts,
+    // so anyone who previously unsubscribed is never silently resubscribed.
+    const upsert = await fetch(`${base}/members/${hash}`, {
+      method: 'PUT',
+      headers,
       body: JSON.stringify({
-        email_address: email,
-        status: 'subscribed',
-        tags: ['askli', `form-${formId}`],
-        merge_fields: {
-          SOURCE: 'Askli'
-        }
+        email_address: clean,
+        status_if_new: 'subscribed',
+        merge_fields: { SOURCE: 'Askli' }
       })
     })
 
-    const data = await response.json()
+    const data = await upsert.json()
 
-    // Mailchimp returns 400 if already subscribed — that's fine
-    if (!response.ok && data.title !== 'Member Exists') {
+    if (!upsert.ok) {
       console.error('Mailchimp error:', data)
       return {
-        statusCode: response.status,
+        statusCode: upsert.status,
         body: JSON.stringify({ error: data.detail || 'Mailchimp error' })
+      }
+    }
+
+    // Tags are a separate endpoint — Mailchimp will not apply them on an
+    // update, so existing contacts only get tagged by this second call.
+    const clean_tags = (Array.isArray(tags) ? tags : [])
+      .map(t => String(t).trim())
+      .filter(Boolean)
+
+    if (clean_tags.length) {
+      const tagged = await fetch(`${base}/members/${hash}/tags`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          tags: clean_tags.map(name => ({ name, status: 'active' }))
+        })
+      })
+
+      if (!tagged.ok) {
+        console.error('Mailchimp tagging failed:', await tagged.text())
       }
     }
 
     return {
       statusCode: 200,
-      body: JSON.stringify({ success: true, status: data.status || 'exists' })
+      body: JSON.stringify({
+        success: true,
+        status: data.status || 'exists',
+        tags: clean_tags
+      })
     }
 
   } catch (err) {

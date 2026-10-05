@@ -240,7 +240,7 @@ export default function PublicForm() {
         const mcField = (form.fields || []).find(f => f.label === settings.mailchimp_email_field)
         const emailValue = mcField ? values[mcField.id] : submissionData[settings.mailchimp_email_field]
         if (emailValue) {
-          await triggerMailchimp(emailValue, form.id)
+          await triggerMailchimp(emailValue, form.id, settings.mailchimp_tags || [])
         }
       }
 

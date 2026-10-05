@@ -152,12 +152,12 @@ function generateSlug(title) {
 }
 
 // Trigger Netlify functions after submission
-export async function triggerMailchimp(email, formId) {
+export async function triggerMailchimp(email, formId, tags = []) {
   try {
     await fetch('/.netlify/functions/mailchimp-subscribe', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, formId })
+      body: JSON.stringify({ email, formId, tags })
     })
   } catch (e) {
     console.warn('Mailchimp sync failed:', e)
