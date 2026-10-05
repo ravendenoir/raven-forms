@@ -1,8 +1,39 @@
 // Netlify Function: Mailchimp Subscriber
-// Adds email to your Mailchimp audience when a form is submitted,
-// and applies the per-form tags set in form settings (mailchimp_tags).
+//
+// Each form chooses which Mailchimp ACCOUNT it talks to and which TAGS it
+// applies, via the form's settings (mailchimp_account, mailchimp_tags).
+//
+// Accounts are defined by environment variables in Netlify, never in this
+// repo and never in the database. For an account named "regina", set:
+//
+//   MAILCHIMP_REGINA_API_KEY
+//   MAILCHIMP_REGINA_SERVER_PREFIX   (e.g. us19)
+//   MAILCHIMP_REGINA_LIST_ID
+//
+// A form with no account set falls back to the unprefixed defaults:
+//   MAILCHIMP_API_KEY / MAILCHIMP_SERVER_PREFIX / MAILCHIMP_LIST_ID
+//
+// If an account is named but its variables are missing, the function stops
+// rather than quietly writing to the default account. That matters: a
+// Regina subscriber must never land in Raven's audience.
 
 import crypto from 'node:crypto'
+
+// Account names come from form settings, so constrain them before they ever
+// touch process.env lookups.
+function envPrefix(account) {
+  const slug = String(account || '').trim().toUpperCase().replace(/[^A-Z0-9]+/g, '_')
+  return slug ? `MAILCHIMP_${slug}_` : 'MAILCHIMP_'
+}
+
+function resolveAccount(account) {
+  const p = envPrefix(account)
+  return {
+    apiKey: process.env[`${p}API_KEY`],
+    server: process.env[`${p}SERVER_PREFIX`],
+    listId: process.env[`${p}LIST_ID`]
+  }
+}
 
 export async function handler(event) {
   if (event.httpMethod !== 'POST') {
@@ -10,19 +41,23 @@ export async function handler(event) {
   }
 
   try {
-    const { email, tags = [] } = JSON.parse(event.body)
+    const { email, account = '', tags = [] } = JSON.parse(event.body)
 
     if (!email) {
       return { statusCode: 400, body: JSON.stringify({ error: 'Email is required' }) }
     }
 
-    const apiKey = process.env.MAILCHIMP_API_KEY
-    const server = process.env.MAILCHIMP_SERVER_PREFIX
-    const listId = process.env.MAILCHIMP_LIST_ID
+    const { apiKey, server, listId } = resolveAccount(account)
 
     if (!apiKey || !server || !listId) {
-      console.warn('Mailchimp not configured — skipping')
-      return { statusCode: 200, body: JSON.stringify({ skipped: true }) }
+      // Named but unconfigured is a misconfiguration, not a no-op. Never
+      // silently fall through to another account's audience.
+      const label = account ? `account "${account}"` : 'default account'
+      console.warn(`Mailchimp ${label} not configured — skipping`)
+      return {
+        statusCode: 200,
+        body: JSON.stringify({ skipped: true, account: account || 'default' })
+      }
     }
 
     const clean = String(email).trim()
@@ -33,8 +68,8 @@ export async function handler(event) {
       'Authorization': `Basic ${Buffer.from(`anystring:${apiKey}`).toString('base64')}`
     }
 
-    // Upsert the contact. status_if_new only applies to brand-new contacts,
-    // so anyone who previously unsubscribed is never silently resubscribed.
+    // Upsert. status_if_new applies only to brand-new contacts, so anyone
+    // who previously unsubscribed is never silently resubscribed.
     const upsert = await fetch(`${base}/members/${hash}`, {
       method: 'PUT',
       headers,
@@ -55,18 +90,18 @@ export async function handler(event) {
       }
     }
 
-    // Tags are a separate endpoint — Mailchimp will not apply them on an
-    // update, so existing contacts only get tagged by this second call.
-    const clean_tags = (Array.isArray(tags) ? tags : [])
+    // Tags are a separate endpoint. Mailchimp ignores tags on an update, so
+    // without this call existing contacts would never get tagged.
+    const cleanTags = (Array.isArray(tags) ? tags : [])
       .map(t => String(t).trim())
       .filter(Boolean)
 
-    if (clean_tags.length) {
+    if (cleanTags.length) {
       const tagged = await fetch(`${base}/members/${hash}/tags`, {
         method: 'POST',
         headers,
         body: JSON.stringify({
-          tags: clean_tags.map(name => ({ name, status: 'active' }))
+          tags: cleanTags.map(name => ({ name, status: 'active' }))
         })
       })
 
@@ -80,7 +115,8 @@ export async function handler(event) {
       body: JSON.stringify({
         success: true,
         status: data.status || 'exists',
-        tags: clean_tags
+        account: account || 'default',
+        tags: cleanTags
       })
     }
 

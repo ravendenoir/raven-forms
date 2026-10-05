@@ -240,7 +240,12 @@ export default function PublicForm() {
         const mcField = (form.fields || []).find(f => f.label === settings.mailchimp_email_field)
         const emailValue = mcField ? values[mcField.id] : submissionData[settings.mailchimp_email_field]
         if (emailValue) {
-          await triggerMailchimp(emailValue, form.id, settings.mailchimp_tags || [])
+          await triggerMailchimp(
+            emailValue,
+            form.id,
+            settings.mailchimp_tags || [],
+            settings.mailchimp_account || ''
+          )
         }
       }
 
@@ -261,23 +266,6 @@ export default function PublicForm() {
             settings.welcome_email_from || form.title
           )
         }
-      }
-
-      // Trigger webhook
-      if (settings.webhook_enabled && settings.webhook_url) {
-        try {
-          fetch(settings.webhook_url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            mode: 'no-cors',
-            body: JSON.stringify({
-              form_id: form.id,
-              form_title: form.title,
-              submitted_at: new Date().toISOString(),
-              data: submissionData,
-            }),
-          })
-        } catch (err) { console.error('Webhook error:', err) }
       }
 
       // Handle thank you

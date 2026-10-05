@@ -20,6 +20,21 @@ import {
   SlidersHorizontal, Clock, Minus, BarChart3, Pipette
 } from 'lucide-react'
 
+// Mailchimp accounts selectable per form.
+//
+// The `value` is a name only. The actual credentials live in Netlify
+// environment variables and never touch this repo or the database. For a
+// value of "regina", the function reads MAILCHIMP_REGINA_API_KEY,
+// MAILCHIMP_REGINA_SERVER_PREFIX and MAILCHIMP_REGINA_LIST_ID.
+//
+// To add a pen name later: add a row here, then add its three variables in
+// Netlify. An empty value uses the unprefixed MAILCHIMP_* defaults.
+const MAILCHIMP_ACCOUNTS = [
+  { value: '', label: 'Default' },
+  { value: 'raven', label: 'Raven' },
+  { value: 'regina', label: 'Regina' },
+]
+
 const FIELD_TYPES = [
   { type: 'banner_image', label: 'Banner Image', icon: Image, category: 'content' },
   { type: 'avatar_image', label: 'Avatar Image', icon: UserCircle, category: 'content' },
@@ -991,6 +1006,18 @@ function SettingsPanel({ settings, onUpdate, onClose, formDescription, onDescrip
           {settings.mailchimp_enabled && (
             <>
               <div>
+                <label className="block text-xs text-raven-500 mb-1 font-medium">Mailchimp Account</label>
+                <select
+                  value={settings.mailchimp_account || ''}
+                  onChange={e => onUpdate({ ...settings, mailchimp_account: e.target.value })}
+                  className="w-full px-3 py-2 bg-white border border-raven-200 rounded-lg text-sm text-raven-50">
+                  {MAILCHIMP_ACCOUNTS.map(a => (
+                    <option key={a.value} value={a.value}>{a.label}</option>
+                  ))}
+                </select>
+                <p className="text-[10px] text-raven-500/60 mt-1">Which Mailchimp account this form's subscribers go to. Keys are set in Netlify, never here.</p>
+              </div>
+              <div>
                 <label className="block text-xs text-raven-500 mb-1 font-medium">Email Field ID</label>
                 <input type="text" value={settings.mailchimp_email_field || ''} onChange={e => onUpdate({ ...settings, mailchimp_email_field: e.target.value })}
                   className="w-full px-3 py-2 bg-white border border-raven-200 rounded-lg text-sm text-raven-50 font-mono" />
@@ -1054,29 +1081,6 @@ function SettingsPanel({ settings, onUpdate, onClose, formDescription, onDescrip
           )}
         </div>
 
-        {/* Webhooks */}
-        <div className="border-t border-raven-200 pt-4 space-y-3">
-          <h4 className="text-xs text-raven-500 font-medium">Webhooks</h4>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs text-raven-50 font-medium">Send data to webhook</p>
-              <p className="text-[10px] text-raven-500/60">POST submission data to a URL on every response</p>
-            </div>
-            <button onClick={() => onUpdate({ ...settings, webhook_enabled: !settings.webhook_enabled })}
-              className={`w-10 h-5 rounded-full transition-smooth relative ${settings.webhook_enabled ? 'bg-[#03ABFA]' : 'bg-gray-300'}`}>
-              <div className={`w-4 h-4 rounded-full bg-white shadow absolute top-0.5 transition-smooth ${settings.webhook_enabled ? 'left-5' : 'left-0.5'}`} />
-            </button>
-          </div>
-          {settings.webhook_enabled && (
-            <div>
-              <label className="block text-xs text-raven-500 mb-1 font-medium">Webhook URL</label>
-              <input type="url" value={settings.webhook_url || ''} onChange={e => onUpdate({ ...settings, webhook_url: e.target.value })}
-                placeholder="https://hooks.zapier.com/... or https://hook.us1.make.com/..."
-                className="w-full px-3 py-2 bg-white border border-raven-200 rounded-lg text-sm text-raven-50" />
-              <p className="text-[10px] text-raven-500/60 mt-1">Works with Zapier, Make, n8n, or any URL that accepts POST requests with JSON body</p>
-            </div>
-          )}
-        </div>
 
         <button onClick={onClose} className="w-full py-2.5 bg-[#03ABFA] text-white font-semibold rounded-lg hover:opacity-90 transition-smooth text-sm">Done</button>
       </div>
@@ -1098,6 +1102,7 @@ export default function FormBuilder() {
     thank_you_message: 'Thanks for submitting!',
     thank_you_url: '',
     mailchimp_enabled: false,
+    mailchimp_account: '',
     mailchimp_email_field: '',
     mailchimp_tags: [],
     notification_enabled: true,
@@ -1116,8 +1121,6 @@ export default function FormBuilder() {
     show_score: false,
     show_correct_answers: false,
     show_poll_results: false,
-    webhook_url: '',
-    webhook_enabled: false,
     expires_at: '',
     max_responses: 0,
     form_password: '',
