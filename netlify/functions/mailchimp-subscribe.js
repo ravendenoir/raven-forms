@@ -29,8 +29,12 @@ function envPrefix(account) {
 function resolveAccount(account) {
   const p = envPrefix(account)
   return {
-    apiKey: process.env[`${p}API_KEY`],
-    server: process.env[`${p}SERVER_PREFIX`],
+    // Key and server fall back to the shared defaults, so several audiences
+    // inside ONE Mailchimp account need only their own LIST_ID set.
+    apiKey: process.env[`${p}API_KEY`] || process.env.MAILCHIMP_API_KEY,
+    server: process.env[`${p}SERVER_PREFIX`] || process.env.MAILCHIMP_SERVER_PREFIX,
+    // No fallback. An audience must be named explicitly, so a Regina
+    // subscriber can never quietly land in Raven's list.
     listId: process.env[`${p}LIST_ID`]
   }
 }
