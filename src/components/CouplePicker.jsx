@@ -28,10 +28,11 @@ function score(c, q) {
   const hay = `${title} ${names} ${series} ${extra}`
   if (!tokens.every(t => hay.includes(t))) return 0
   let s = 1
+  const wordStart = (text) => text.split(' ').some(w => w.startsWith(tokens[0]))
   if (title.startsWith(q)) s += 6
-  else if (title.includes(q)) s += 4
-  if (names.split(' ').some(w => w.startsWith(tokens[0]))) s += 5
-  if (series.startsWith(q)) s += 2
+  else if (wordStart(title)) s += 4
+  if (wordStart(names)) s += 5
+  if (series.startsWith(q) || wordStart(series)) s += 3
   return s
 }
 
