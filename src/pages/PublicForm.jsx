@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
-import { getFormBySlug, submitForm, uploadFile, triggerMailchimp, triggerNotification, triggerWelcomeEmail, checkDuplicateEmailByField, trackFormView, getSubmissions, getSubmissionCount } from '../lib/supabase'
+import { getActiveCouples, getFormBySlug, submitForm, uploadFile, triggerMailchimp, triggerNotification, triggerWelcomeEmail, checkDuplicateEmailByField, trackFormView, getSubmissions, getSubmissionCount } from '../lib/supabase'
+import CouplePicker from '../components/CouplePicker'
 import { Star, CheckCircle2, AlertCircle, Loader2, Upload, X, Lock } from 'lucide-react'
 
 export default function PublicForm() {
@@ -18,6 +19,7 @@ export default function PublicForm() {
   const [quizResults, setQuizResults] = useState(null)
   const [pollResults, setPollResults] = useState(null)
   const [formClosed, setFormClosed] = useState(null)
+  const [couples, setCouples] = useState([])
   const [passwordRequired, setPasswordRequired] = useState(false)
   const [passwordInput, setPasswordInput] = useState('')
   const [passwordError, setPasswordError] = useState('')
@@ -67,6 +69,11 @@ export default function PublicForm() {
         else initial[field.id] = ''
       })
       setValues(initial)
+
+      // Load the couple list only for forms that use the picker
+      if ((data.fields || []).some(f => f.type === 'couple_picker')) {
+        getActiveCouples().then(setCouples).catch(() => setCouples([]))
+      }
     } catch (err) {
       setError('Form not found or no longer available.')
     } finally {
@@ -218,11 +225,24 @@ export default function PublicForm() {
 
       // Build submission data with field labels
       const submissionData = {}
+      const couplePicks = {}
       ;(form.fields || []).forEach(field => {
         if (!isFieldVisible(field)) return
         if (!['heading', 'banner_image', 'avatar_image', 'richtext', 'file', 'divider'].includes(field.type)) {
           if (field.type === 'file' && fileUrls[field.id]) {
             submissionData[field.label] = fileUrls[field.id]
+          } else if (field.type === 'couple_picker') {
+            const pick = values[field.id] || null
+            submissionData[field.label] = pick
+              ? (pick.coupleId === 'other' ? `Other: ${pick.otherText}` : pick.display)
+              : ''
+            submissionData['Couple ID'] = pick ? pick.coupleId : ''
+            if (pick) couplePicks[field.label] = {
+              coupleId: pick.coupleId,
+              bookTitle: pick.bookTitle || '',
+              coupleNames: pick.coupleNames || '',
+              otherText: pick.otherText || '',
+            }
           } else {
             submissionData[field.label] = values[field.id]
           }
@@ -233,6 +253,7 @@ export default function PublicForm() {
       await submitForm(form.id, submissionData, {
         submitted_at: new Date().toISOString(),
         user_agent: navigator.userAgent,
+        ...(Object.keys(couplePicks).length ? { couple_picks: couplePicks } : {}),
       })
 
       // Trigger Mailchimp if enabled
@@ -567,6 +588,19 @@ export default function PublicForm() {
                       value={values[field.id] || ''}
                       onChange={e => setValue(field.id, e.target.value)}
                       placeholder={field.placeholder}
+                    />
+                  )}
+
+                  {/* Couple picker */}
+                  {field.type === 'couple_picker' && (
+                    <CouplePicker
+                      couples={couples}
+                      value={values[field.id] || null}
+                      onChange={v => setValue(field.id, v)}
+                      placeholder={field.placeholder}
+                      textColor={textColor}
+                      cardColor={cardColor}
+                      accentColor={accentColor}
                     />
                   )}
 

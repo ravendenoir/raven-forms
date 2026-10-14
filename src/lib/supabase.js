@@ -261,3 +261,45 @@ export async function getSubmissionCount(formId) {
   if (error) return 0
   return count || 0
 }
+
+// ─── Couples (for the Couple Picker field) ───────
+
+export async function getActiveCouples() {
+  const { data, error } = await supabase
+    .from('couples')
+    .select('id, book_title, couple_names, series, search_terms')
+    .eq('active', true)
+    .order('book_title')
+  if (error) throw error
+  return data || []
+}
+
+export async function getAllCouples() {
+  const { data, error } = await supabase
+    .from('couples')
+    .select('*')
+    .order('book_title')
+  if (error) throw error
+  return data || []
+}
+
+export async function saveCouple(couple) {
+  const { data, error } = await supabase
+    .from('couples')
+    .upsert(couple)
+    .select()
+    .single()
+  if (error) throw error
+  return data
+}
+
+// Every submission that carries a couple pick, with its form's title and slug.
+export async function getCoupleVotes() {
+  const { data, error } = await supabase
+    .from('submissions')
+    .select('id, form_id, created_at, metadata, forms(title, slug)')
+    .not('metadata->couple_picks', 'is', null)
+    .order('created_at', { ascending: false })
+  if (error) throw error
+  return data || []
+}

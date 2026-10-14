@@ -17,7 +17,8 @@ import {
   ExternalLink, Image, UserCircle, FileText, Code2,
   Columns, Loader2, Bold, Italic, Underline,
   ListOrdered, Quote, Palette, ImagePlus,
-  SlidersHorizontal, Clock, Minus, BarChart3, Pipette
+  SlidersHorizontal, Clock, Minus, BarChart3, Pipette,
+  Heart,
 } from 'lucide-react'
 
 // Mailchimp accounts selectable per form.
@@ -48,6 +49,7 @@ const FIELD_TYPES = [
   { type: 'url', label: 'URL', icon: Link2, category: 'input' },
   { type: 'date', label: 'Date', icon: Calendar, category: 'input' },
   { type: 'select', label: 'Dropdown', icon: ChevronDown, category: 'input' },
+  { type: 'couple_picker', label: 'Couple Picker', icon: Heart, category: 'input' },
   { type: 'radio', label: 'Multiple Choice', icon: Circle, category: 'input' },
   { type: 'checkbox', label: 'Checkboxes', icon: CheckSquare, category: 'input' },
   { type: 'rating', label: 'Rating', icon: Star, category: 'input' },
@@ -770,7 +772,13 @@ function SortableFormField({ field, isSelected, onSelect, onUpdate, onDelete, on
             </div>
             {field.description && <p className="text-xs text-raven-500 mb-2">{field.description}</p>}
 
-            {field.type === 'textarea' ? (
+            {field.type === 'couple_picker' ? (
+              <div>
+                <input type="text" placeholder={field.placeholder || 'Start typing a title or a name...'} readOnly
+                  className="w-full px-3 py-2.5 bg-raven-900 border border-raven-200 rounded-lg text-sm text-raven-500 pointer-events-none" />
+                <p className="text-[11px] text-raven-500 mt-1.5">Searches the couple list. Manage it on the Couples page.</p>
+              </div>
+            ) : field.type === 'textarea' ? (
               <textarea rows={3} placeholder={field.placeholder || 'Type here...'} readOnly
                 className="w-full px-3 py-2.5 bg-raven-900 border border-raven-200 rounded-lg text-sm text-raven-500 resize-none pointer-events-none" />
             ) : field.type === 'select' ? (

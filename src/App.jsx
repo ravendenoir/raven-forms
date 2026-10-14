@@ -5,7 +5,8 @@ import Dashboard from './pages/Dashboard'
 import FormBuilder from './pages/FormBuilder'
 import FormResponses from './pages/FormResponses'
 import PublicForm from './pages/PublicForm'
-import { LayoutGrid, LogOut, Plus } from 'lucide-react'
+import Couples from './pages/Couples'
+import { LayoutGrid, LogOut, Plus, Heart } from 'lucide-react'
 
 // ─── Auth Context ────────────────────────────────
 const AuthContext = createContext(null)
@@ -160,6 +161,17 @@ function AdminLayout({ children }) {
               <LayoutGrid className="w-5 h-5" />
             </button>
             <button
+              onClick={() => navigate('/couples')}
+              title="Couples"
+              className={`p-2 rounded-lg transition-smooth ${
+                location.pathname === '/couples'
+                  ? 'text-[#03ABFA]'
+                  : 'text-gray-400 hover:text-[#03ABFA]'
+              }`}
+            >
+              <Heart className="w-5 h-5" />
+            </button>
+            <button
               onClick={handleSignOut}
               className="p-2 text-gray-400 hover:text-red-500 rounded-lg transition-smooth"
             >
@@ -232,6 +244,9 @@ export default function App() {
           } />
           <Route path="/forms/:id/edit" element={
             <ProtectedRoute><FormBuilder /></ProtectedRoute>
+          } />
+          <Route path="/couples" element={
+            <ProtectedRoute><Couples /></ProtectedRoute>
           } />
           <Route path="/forms/:id/responses" element={
             <ProtectedRoute><FormResponses /></ProtectedRoute>
