@@ -303,3 +303,14 @@ export async function getCoupleVotes() {
   if (error) throw error
   return data || []
 }
+
+// Bulk upsert for CSV/JSON imports. Never deletes.
+export async function saveCouples(rows) {
+  if (!rows.length) return []
+  const { data, error } = await supabase
+    .from('couples')
+    .upsert(rows, { onConflict: 'id' })
+    .select()
+  if (error) throw error
+  return data || []
+}
