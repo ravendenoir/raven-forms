@@ -494,7 +494,7 @@ export default function PublicForm() {
         <div className="mb-6">
           <h1 className="font-display text-2xl font-bold" style={{ color: textColor }}>{form.title}</h1>
           {form.description && (
-            <p className="text-raven-500 text-sm mt-1">{form.description}</p>
+            <p className="text-sm mt-1" style={{ color: textColor, opacity: 0.85 }}>{form.description}</p>
           )}
         </div>
 
@@ -557,7 +557,7 @@ export default function PublicForm() {
                     {field.required && <span style={{ color: accentColor }} className="ml-1">*</span>}
                   </label>
                   {field.description && (
-                    <p className="text-xs text-raven-500/70 mb-2">{field.description}</p>
+                    <p className="text-xs mb-2" style={{ color: textColor, opacity: 0.7 }}>{field.description}</p>
                   )}
 
                   {/* Text inputs */}
@@ -605,7 +605,7 @@ export default function PublicForm() {
                               <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: accentColor }} />
                             )}
                           </div>
-                          <span className="text-sm text-raven-700">{o}</span>
+                          <span className="text-sm" style={{ color: textColor }}>{o}</span>
                           <input type="radio" className="sr-only" name={field.id} value={o}
                             checked={values[field.id] === o}
                             onChange={() => setValue(field.id, o)} />
@@ -630,7 +630,7 @@ export default function PublicForm() {
                                 </svg>
                               )}
                             </div>
-                            <span className="text-sm text-raven-700">{o}</span>
+                            <span className="text-sm" style={{ color: textColor }}>{o}</span>
                             <input type="checkbox" className="sr-only" checked={checked}
                               onChange={() => {
                                 const curr = values[field.id] || []
